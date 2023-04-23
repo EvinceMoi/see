@@ -147,7 +147,7 @@ const get_stream_key_from_page = async (rid: string): Promise<stream_info_t> => 
 export const get_play_url = async (rid: string): Promise<video_info_t> => {
   const title = (rid: string) => {
     const time = new Date().toTimeString().substring(0, 8);
-    return `斗鱼直播间 - ${rid} - ${time}`;
+    return `斗鱼 - ${rid} - ${time}`;
   };
 
   {
