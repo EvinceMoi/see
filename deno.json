@@ -1,7 +1,7 @@
 {
   "tasks": {
     "dev": "deno run -A",
-    "plugin-export": "deno run -A utils/plugin.ts ./plugins",
+    "plugin-export": "deno run -A tools/plugin.ts ./plugins",
     "start": "deno run --allow-all see.ts",
     "build": "deno compile --allow-all --unstable -o build/see see.ts"
   },
@@ -10,6 +10,15 @@
     "cliffy/": "https://deno.land/x/cliffy@v0.25.7/",
     "std/": "https://deno.land/std@0.184.0/",
     "checksum": "https://deno.land/x/checksum@1.2.0/mod.ts",
-    "qrcode": "https://deno.land/x/qrcode_terminal@v1.1.1/mod.js"
+    "qrcode": "https://deno.land/x/qrcode_terminal@v1.1.1/mod.js",
+    "puppeteer": "https://deno.land/x/puppeteer@16.2.0/mod.ts"
+  },
+  "compilerOptions": {
+    "lib": [
+      "deno.window",
+      "ESNEXT",
+      "DOM"
+    ],
+    "noImplicitAny": false
   }
 }

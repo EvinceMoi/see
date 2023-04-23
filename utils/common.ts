@@ -58,4 +58,14 @@ export const play_video = async (vi: video_info_t) => {
   });
   const child = command.spawn();
   await child.status;
-}
+};
+
+export const seq = (start = 0) => {
+  return {
+    *[Symbol.iterator]() {
+      while (true) {
+        yield start++;
+      }
+    }
+  }
+};

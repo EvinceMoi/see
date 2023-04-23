@@ -11,7 +11,7 @@ const mod_gen = async (dir: string, plugins: string[]) => {
   lines.push('');
   lines.push(`import { plugin_t } from '@utils/types.ts';`);
   plugins.forEach(p => {
-    lines.push(`import ${plug_name(p)} from './${p}/mod.ts'`);
+    lines.push(`import ${plug_name(p)} from './${p}/mod.ts';`);
   });
 
   lines.push('');
