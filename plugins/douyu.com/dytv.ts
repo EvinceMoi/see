@@ -155,7 +155,7 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
     const { error, key } = await get_stream_key_from_preview(rid);
     if (!error) {
       return {
-        title: title(rid),
+        title: title(rid) + ' - ' + key,
         video: `${URL_PRE}/live/${key}_4000.xs`,
       };
     }
@@ -167,7 +167,7 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
     const { error, key, url } = await get_stream_key_from_page(rid);
     if (!error) {
       return {
-        title: title(rid),
+        title: title(rid) + ' - ' + key,
         video: url,
       }
     }
