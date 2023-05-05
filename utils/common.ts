@@ -42,6 +42,8 @@ export interface video_info_t {
 export const play_video = async (vi: video_info_t) => {
   if (!vi.video) throw new Error('no playable stream');
 
+  console.log('playing', vi.video);
+
   const args: string[] = [];
   args.push(vi.video);
   if (vi.audio) args.push(`--audio-file=${vi.audio}`);

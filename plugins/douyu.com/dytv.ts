@@ -151,17 +151,6 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
   };
 
   {
-    // get key from web preview
-    const { error, key } = await get_stream_key_from_preview(rid);
-    if (!error) {
-      return {
-        title: title(rid) + ' - ' + key,
-        video: `${URL_PRE}/live/${key}_4000.xs`,
-      };
-    }
-  }
-
-  {
     // get key failed, try js
     // request mobile page
     const { error, key, url } = await get_stream_key_from_page(rid);
@@ -170,6 +159,17 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
         title: title(rid) + ' - ' + key,
         video: url,
       }
+    }
+  }
+
+  {
+    // get key from web preview
+    const { error, key } = await get_stream_key_from_preview(rid);
+    if (!error) {
+      return {
+        title: title(rid) + ' - ' + key,
+        video: `${URL_PRE}/live/${key}_4000.xs`,
+      };
     }
   }
 
