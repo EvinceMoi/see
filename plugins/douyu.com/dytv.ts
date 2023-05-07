@@ -5,7 +5,8 @@ const md5sum = (data: string) => {
   return new Hash('md5').digest(encode(data)).hex();
 }
 
-const URL_PRE = 'http://ip01864405737.livehwc3.cn/xp2plive-hw.douyucdn.cn';
+// const URL_PRE = 'http://ip01864405737.livehwc3.cn/xp2plive-hw.douyucdn.cn';
+const URL_PRE = 'http://hdltctwk.douyucdn2.cn';
 const RE_KEY = /(\d{1,9}[0-9a-zA-Z]+)_?\d{0,4}(\/playlist|.m3u8)/;
 const DID = '10000000000000000000000000001501';
 const USER_AGENT = {
@@ -32,11 +33,11 @@ const get_stream_key_from_preview = async (rid: string): Promise<stream_info_t> 
     rid,
     did: DID,
   };
-  const now = Date.now();
-  const auth = md5sum(rid + now.toString());
+  const now = Date.now().toString();
+  const auth = md5sum(rid + now);
   const headers = {
     rid,
-    time: now.toString(),
+    time: now,
     auth
   };
 
@@ -151,6 +152,19 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
   };
 
   {
+    // get key from web preview
+    const { error, key } = await get_stream_key_from_preview(rid);
+    if (!error) {
+      return {
+        title: title(rid) + ' - ' + key,
+        video: `${URL_PRE}/live/${key}_8000.xs`,
+      };
+    } else {
+      console.log('failed to get stream key from preview:', error);
+    }
+  }
+
+  {
     // get key failed, try js
     // request mobile page
     const { error, key, url } = await get_stream_key_from_page(rid);
@@ -159,17 +173,6 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
         title: title(rid) + ' - ' + key,
         video: url,
       }
-    }
-  }
-
-  {
-    // get key from web preview
-    const { error, key } = await get_stream_key_from_preview(rid);
-    if (!error) {
-      return {
-        title: title(rid) + ' - ' + key,
-        video: `${URL_PRE}/live/${key}_4000.xs`,
-      };
     }
   }
 

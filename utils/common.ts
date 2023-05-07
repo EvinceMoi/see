@@ -37,6 +37,7 @@ export interface video_info_t {
   geometry?: string;
   mute?: boolean;
   referrer?: string;
+  player_options?: string[];
 }
 
 export const play_video = async (vi: video_info_t) => {
@@ -54,6 +55,7 @@ export const play_video = async (vi: video_info_t) => {
   const mute = vi.mute ?? 'no';
   args.push(`--mute=${mute}`);
   if (vi.referrer) args.push(`--referrer=${vi.referrer}`);
+  if (vi.player_options) args.push(...vi.player_options);
 
   const command = new Deno.Command('mpv', {
     args,
