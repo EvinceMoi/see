@@ -43,6 +43,7 @@ interface stream_info_t {
   key?: string,
   url?: string,
 }
+// deno-lint-ignore no-unused-vars
 const get_stream_key_from_preview = async (rid: string): Promise<stream_info_t> => {
   const url = `https://playweb.douyucdn.cn/lapi/live/hlsH5Preview/${rid}`;
   const data = {
