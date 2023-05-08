@@ -1,4 +1,5 @@
 import { encode, Hash } from 'checksum';
+import moment from 'moment';
 import { video_info_t } from '@utils/common.ts';
 
 const md5sum = (data: string) => {
@@ -20,6 +21,21 @@ const get_mobile_page = async (rid: string): Promise<string> => {
     }
   });
   return resp.text();
+}
+interface room_info_t {
+  rid: number;
+  vipId: number;
+  roomName: string;
+  nickname: string;
+  cate2Name: string;
+  isLive: number;
+  showTime: number;
+}
+const get_room_info = (html: string): room_info_t => {
+  const match = html.match(/var \$ROOM = (\{.+\})/);
+  if (!match || match.length != 2) throw new Error('failed to get room info');
+  const info = JSON.parse(match[1]);
+  return info as room_info_t;
 }
 
 interface stream_info_t {
@@ -75,8 +91,7 @@ const get_stream_key_from_preview = async (rid: string): Promise<stream_info_t> 
   };
 }
 
-const get_stream_key_from_page = async (rid: string): Promise<stream_info_t> => {
-  const html = await get_mobile_page(rid);
+const get_stream_key_from_page = async (rid: string, html: string): Promise<stream_info_t> => {
   const match_func = html.match(/(function ub98484234.*)\s(var.*)/);
   if (!match_func) {
     return {
@@ -145,36 +160,37 @@ const get_stream_key_from_page = async (rid: string): Promise<stream_info_t> => 
   }
 }
 
-export const get_play_url = async (rid: string): Promise<video_info_t> => {
-  const title = (rid: string) => {
-    const time = new Date().toTimeString().substring(0, 8);
-    return `斗鱼 - ${rid} - ${time}`;
+export const get_play_url = async (rid: string, use_cdn: boolean): Promise<video_info_t> => {
+  const title = (room: room_info_t) => {
+    const open_time = moment(room.showTime * 1000).format('YYYY-MM-DD HH:mm:ss');
+    return `斗鱼 - ${room.rid}|${room.nickname}|${room.cate2Name} - [${open_time}]`;
   };
 
-  {
-    // get key from web preview
-    const { error, key } = await get_stream_key_from_preview(rid);
-    if (!error) {
-      return {
-        title: title(rid) + ' - ' + key,
-        video: `${URL_PRE}/live/${key}_8000.xs`,
-      };
-    } else {
-      console.log('failed to get stream key from preview:', error);
-    }
-  }
+  const html = await get_mobile_page(rid);
+  const room_info = get_room_info(html);
+  if (!room_info.isLive) throw new Error('room is not living at the moment');
+  const real_rid = room_info.rid.toString();
 
-  {
-    // get key failed, try js
-    // request mobile page
-    const { error, key, url } = await get_stream_key_from_page(rid);
-    if (!error) {
-      return {
-        title: title(rid) + ' - ' + key,
-        video: url,
-      }
-    }
-  }
+  const { error, key, url } = await get_stream_key_from_page(real_rid, html);
+  if (error) throw new Error(`failed to get stream info from mobile page: ${error}`);
+  const steam_title = title(room_info) + ' - ' + key;
+  const video_url = use_cdn ? `${URL_PRE}/live/${key}_8000.xs` : url;
+  
+  return {
+    title: steam_title,
+    video: video_url,
+  };
 
-  throw new Error('cannot find playable link');
+  // {
+  //   // get key from web preview
+  //   const { error, key } = await get_stream_key_from_preview(real_rid);
+  //   if (!error) {
+  //     return {
+  //       title: title(room_info) + ' - ' + key,
+  //       video: `${URL_PRE}/live/${key}_8000.xs`,
+  //     };
+  //   } else {
+  //     console.log('failed to get stream key from preview:', error);
+  //   }
+  // }
 }
