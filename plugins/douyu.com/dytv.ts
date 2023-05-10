@@ -161,7 +161,7 @@ const get_stream_key_from_page = async (rid: string, html: string): Promise<stre
   }
 }
 
-export const get_play_url = async (rid: string, use_cdn: boolean): Promise<video_info_t> => {
+export const get_play_url = async (rid: string, use_cdn: boolean, bitrate = 8000): Promise<video_info_t> => {
   const title = (room: room_info_t) => {
     const open_time = moment(room.showTime * 1000).format('YYYY-MM-DD HH:mm:ss');
     return `斗鱼 - ${room.rid}|${room.nickname}|${room.cate2Name} - [${open_time}]`;
@@ -175,7 +175,7 @@ export const get_play_url = async (rid: string, use_cdn: boolean): Promise<video
   const { error, key, url } = await get_stream_key_from_page(real_rid, html);
   if (error) throw new Error(`failed to get stream info from mobile page: ${error}`);
   const steam_title = title(room_info) + ' - ' + key;
-  const video_url = use_cdn ? `${URL_PRE}/live/${key}_8000.xs` : url;
+  const video_url = use_cdn ? `${URL_PRE}/live/${key}_${bitrate}.xs` : url;
   
   return {
     title: steam_title,
