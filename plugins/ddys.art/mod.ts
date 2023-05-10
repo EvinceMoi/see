@@ -2,15 +2,27 @@ import { Command } from 'cliffy/command/mod.ts';
 import { play_video, seq } from '@utils/common.ts';
 import { plugin_t } from '@utils/types.ts';
 import { get_playlist, get_video_info, open_page } from './ddys.ts';
-import { Page } from 'https://deno.land/x/puppeteer@16.2.0/mod.ts';
+import { Page } from 'puppeteer';
+
+const DOMAIN_NAME = `ddys.art`;
 
 const ddys = new Command()
   .version('0.0.1')
   .description('play ddys video')
-  .arguments('<uri:string>')
-  .action(async (_opts, uri) => {
+  .arguments('<uri_or_name> [episode:number]')
+  .action(async (_opts, uri_or_name, episode) => {
+    let uri: string;
+    if (uri_or_name.startsWith('http')) {
+      uri = uri_or_name;
+    } else {
+      uri = `https://${DOMAIN_NAME}/${uri_or_name}`;
+      if (episode != undefined) {
+        uri += `?ep=${episode}`
+      }
+    }
     let page: Page | undefined;
     try {
+      console.log('open uri:', uri);
       page = await open_page(uri);
       const playlist = await get_playlist(page);
       console.log('playlist:', playlist.map(p => p.caption));
@@ -34,7 +46,7 @@ const ddys = new Command()
 
   const plugin: plugin_t = {
     id: 'ddys',
-    matches: ['ddys.art'],
+    matches: [DOMAIN_NAME],
     cmd: ddys,
   };
 

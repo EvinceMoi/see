@@ -16,7 +16,8 @@ export const open_page = async (url: string): Promise<Page> => {
     defaultViewport: {
       width: 1920,
       height: 1080,
-    }
+    },
+    args: ["--headless=new"],
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 1920, height: 1080 }); 
