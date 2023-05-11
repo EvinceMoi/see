@@ -8,7 +8,7 @@ const md5sum = (data: string) => {
 
 // const URL_PRE = 'http://ip01864405737.livehwc3.cn/xp2plive-hw.douyucdn.cn';
 const URL_PRE = 'http://hdltctwk.douyucdn2.cn';
-const RE_KEY = /(\d{1,9}[0-9a-zA-Z]+)_?\d{0,4}(\/playlist|.m3u8)/;
+const RE_KEY = /(\d{1,9}[0-9a-zA-Z]+)_?\d{0,4}p?(\/playlist|.m3u8)/;
 const DID = '10000000000000000000000000001501';
 const USER_AGENT = {
   'User-Agenet': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'
