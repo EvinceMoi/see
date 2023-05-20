@@ -8,7 +8,7 @@ const md5sum = (data: string) => {
 
 // const URL_PRE = 'http://ip01864405737.livehwc3.cn/xp2plive-hw.douyucdn.cn';
 // const URL_PRE = 'http://hdltctwk.douyucdn2.cn';
-const URL_PRE = 'http://openhls-tct.douyucdn2.cn';
+// const URL_PRE = 'http://openhls-tct.douyucdn2.cn';
 const RE_KEY = /(\d{1,9}[0-9a-zA-Z]+)_?\d{0,4}p?(\/playlist|.m3u8)/;
 const DID = '10000000000000000000000000001501';
 const USER_AGENT = {
@@ -176,7 +176,11 @@ export const get_play_url = async (rid: string, use_cdn: boolean, bitrate = 8000
   const { error, key, url } = await get_stream_key_from_page(real_rid, html);
   if (error) throw new Error(`failed to get stream info from mobile page: ${error}`);
   const steam_title = title(room_info) + ' - ' + key;
-  const video_url = use_cdn ? `${URL_PRE}/live/${key}_${bitrate}.xs` : url;
+  let video_url = url;
+  if (use_cdn) {
+    const host = new URL(url!).hostname;
+    video_url = `http://${host}/live/${key}_${bitrate}.xs`;
+  }
   
   return {
     title: steam_title,
