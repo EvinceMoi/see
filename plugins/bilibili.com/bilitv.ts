@@ -75,9 +75,8 @@ export const get_video_info = async (url: string): Promise<video_info_t> => {
 
   const bvid = basename(new URL(url).pathname);
   const ass = sub_path(bvid);
-  const download_danmu = Deno.run({
-    cmd: [
-      'danmu2ass',
+  const download_danmu = new Deno.Command('danmu2ass', {
+    args: [
       '-l', '20',
       '-d', '10',
       '--font', 'Noto Sans',
@@ -87,8 +86,8 @@ export const get_video_info = async (url: string): Promise<video_info_t> => {
       url,
       '-o', ass,
     ]
-  });
-  await download_danmu.status();
+  })
+  await download_danmu.output();
 
   vi.subtitle = ass;
   vi.referrer = BASE_URL;
