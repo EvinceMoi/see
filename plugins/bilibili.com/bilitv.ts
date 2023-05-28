@@ -1,7 +1,8 @@
 import { typeByExtension } from 'std/media_types/type_by_extension.ts';
 import { ensureDirSync } from 'std/fs/mod.ts';
 import { basename, join } from 'std/path/mod.ts';
-import { configDir, video_info_t } from '@utils/common.ts';
+import { maxBy } from 'std/collections/max_by.ts';
+import { configDir, video_info_t, USER_AGENT } from '@utils/common.ts';
 
 const BASE_URL = 'https://www.bilibili.com';
 const plug_name = 'bilitv';
@@ -93,4 +94,67 @@ export const get_video_info = async (url: string): Promise<video_info_t> => {
   vi.referrer = BASE_URL;
 
   return vi;
+}
+
+export const get_live_info = async (rid: number): Promise<video_info_t> => {
+  const room_info_res = await fetch(`https://api.live.bilibili.com/room/v1/Room/room_init?id=${rid}`, {
+    headers: {
+      ...USER_AGENT
+    }
+  });
+  const room_info = await room_info_res.json();
+  /*
+    { "code":0,"msg":"ok","message":"ok",
+      "data": {
+        "room_id":7685334,"short_id":888,"uid":3117396,
+        "need_p2p":0,"is_hidden":false,"is_locked":false,"is_portrait":false,
+        "live_status":1,
+        "hidden_till":0,"lock_till":0,"encrypted":false,"pwd_verified":false,
+        "live_time":1685159782,
+        "room_shield":1,"is_sp":0,"special_type":0
+      }
+    }
+  */
+  if (room_info.code != 0) {
+    throw new Error(room_info.msg);
+  }
+
+  const ri = room_info.data;
+  if (ri.live_status != 1) {
+    throw new Error('room is not living at the moment');
+  }
+
+  const real_rid = ri.room_id;
+
+  const play_info_url = `https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo`;
+  const params = new URLSearchParams({
+    room_id: real_rid,
+    protocol: '0,1',
+    format: '0,1,2',
+    codec: '0,1',
+    qn: '10000', // 原画
+    platform: 'h5',
+    ptype: '8'
+  });
+  const res = await fetch(play_info_url + '?' + params, {
+    headers: {
+      ...USER_AGENT
+    }
+  });
+  const sinfo = await res.json();
+  const playurl_info = sinfo.data.playurl_info;
+  const streams = playurl_info.playurl.stream;
+  const stream = streams[0];
+  const codec = maxBy(stream.format[0].codec, (c: Record<string, any>) => c.current_qn);
+  if (!codec) {
+    throw new Error('no codec found');
+  }
+  const base_url = codec.base_url;
+  const url_info = codec.url_info[0];
+  const { host, extra } = url_info;
+  
+  return {
+    video: `${host}${base_url}${extra}`,
+    title: real_rid
+  };
 }

@@ -77,4 +77,8 @@ export const seq = (start = 0) => {
 export const set_term_title = (title: string) => {
   const buf = String.fromCharCode(27) + ']0;' + title + String.fromCharCode(7);
   Deno.stdout.writeSync(new TextEncoder().encode(buf));
-}
+};
+
+export const USER_AGENT = {
+  'User-Agenet': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
+};
