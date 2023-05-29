@@ -145,6 +145,7 @@ export const get_live_info = async (rid: number): Promise<video_info_t> => {
   const playurl_info = sinfo.data.playurl_info;
   const streams = playurl_info.playurl.stream;
   const stream = streams[0];
+  // deno-lint-ignore no-explicit-any
   const codec = maxBy(stream.format[0].codec, (c: Record<string, any>) => c.current_qn);
   if (!codec) {
     throw new Error('no codec found');
