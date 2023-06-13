@@ -127,7 +127,6 @@ const get_stream_key_from_page = async (rid: string, html: string): Promise<stre
     body: params
   });
   const res = await resp.json();
-  console.log(res);
   if (res.code !== 0) {
     return {
       error: JSON.stringify(res)
