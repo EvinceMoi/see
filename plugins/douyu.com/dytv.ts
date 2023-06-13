@@ -1,4 +1,5 @@
 import { encode, Hash } from 'checksum';
+import { DOMParser } from 'deno_dom';
 import moment from 'moment';
 import { video_info_t, USER_AGENT } from '@utils/common.ts';
 
@@ -30,10 +31,11 @@ interface room_info_t {
   showTime: number;
 }
 const get_room_info = (html: string): room_info_t => {
-  const match = html.match(/var \$ROOM = (\{.+\})/);
-  if (!match || match.length != 2) throw new Error('failed to get room info');
-  const info = JSON.parse(match[1]);
-  return info as room_info_t;
+  const doc = new DOMParser().parseFromString(html, 'text/html')!;
+  const page_context_node = doc.querySelector('script[id="vite-plugin-ssr_pageContext"][type="application/json"]');
+  if (!page_context_node) throw new Error('failed to get page context');
+  const page_context = JSON.parse(page_context_node.textContent);
+  return page_context.pageContext.pageProps.room.roomInfo.roomInfo as room_info_t;
 }
 
 interface stream_info_t {
@@ -125,6 +127,7 @@ const get_stream_key_from_page = async (rid: string, html: string): Promise<stre
     body: params
   });
   const res = await resp.json();
+  console.log(res);
   if (res.code !== 0) {
     return {
       error: JSON.stringify(res)

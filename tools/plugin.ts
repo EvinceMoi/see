@@ -1,5 +1,5 @@
 import { walk } from 'std/fs/mod.ts';
-import { join } from 'std/path/mod.ts';
+import { join, toFileUrl } from 'std/path/mod.ts';
 import { colors } from 'cliffy/ansi/colors.ts';
 import { Command } from 'cliffy/command/mod.ts';
 
@@ -39,13 +39,14 @@ export const plugin_export = async (plugin_dir: string) => {
     if (entry.name.startsWith('_')) continue;
 
     try {
-      const module_path = join(entry.path, 'mod.ts');
+      const module_path = toFileUrl(join(entry.path, 'mod.ts')).toString();
       const module = await import(module_path);
       const { id, matches, cmd } = module.default;
       if (typeof id != 'string' || id.length == 0) throw new Error('invalid id');
       if (!Array.isArray(matches) || !matches.every(m => typeof m == 'string')) throw new Error('invalid matches');
       if (!(cmd instanceof Command)) throw new Error('invalid command');
       plugins.push(entry.name);
+      console.log('module:', id);
     } catch (err) {
       console.log(colors.dim(`invalid plugin: ${entry.path}, ${err}`));
     }

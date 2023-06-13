@@ -12,7 +12,8 @@
     "moment": "https://deno.land/x/momentjs@2.29.1-deno/mod.ts",
     "checksum": "https://deno.land/x/checksum@1.2.0/mod.ts",
     "qrcode": "https://deno.land/x/qrcode_terminal@v1.1.1/mod.js",
-    "puppeteer": "https://deno.land/x/puppeteer@16.2.0/mod.ts"
+    "puppeteer": "https://deno.land/x/puppeteer@16.2.0/mod.ts",
+    "deno_dom": "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts"
   },
   "compilerOptions": {
     "lib": [
