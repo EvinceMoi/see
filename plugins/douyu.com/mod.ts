@@ -9,9 +9,10 @@ const douyu = new Command()
   .arguments('<rid:string>')
   .option('--no-cdn', 'dont use cdn (use url retrieved from mobile page)')
   .option('-b, --bitrate <bitrate:number>', 'bitrate', { default: 8000 })
+  .option('-d, --domain <domain:string>', 'cdn domain')
   .action(async (opts, rid) => {
     try {
-      const vi = await get_play_url(rid, !!opts.cdn, opts.bitrate);
+      const vi = await get_play_url(rid, !!opts.cdn, opts.bitrate, opts.domain);
       if (vi.title) set_term_title(vi.title);
       // fix `[ffmpeg] http: Cannot reuse HTTP connection for different host: hlstct.douyucdn2.cn:-1 != 111.19.145.183:-1`
       // see: https://github.com/mpv-player/mpv/issues/5286#issuecomment-415980517

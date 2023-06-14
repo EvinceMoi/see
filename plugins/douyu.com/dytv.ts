@@ -7,9 +7,6 @@ const md5sum = (data: string) => {
   return new Hash('md5').digest(encode(data)).hex();
 }
 
-// const URL_PRE = 'http://ip01864405737.livehwc3.cn/xp2plive-hw.douyucdn.cn';
-// const URL_PRE = 'http://hdltctwk.douyucdn2.cn';
-// const URL_PRE = 'http://openhls-tct.douyucdn2.cn';
 const RE_KEY = /(\d{1,9}[0-9a-zA-Z]+)_?\d{0,4}p?(\/playlist|.m3u8)/;
 const DID = '10000000000000000000000000001501';
 
@@ -161,7 +158,7 @@ const get_stream_key_from_page = async (rid: string, html: string): Promise<stre
   }
 }
 
-export const get_play_url = async (rid: string, use_cdn: boolean, bitrate = 8000): Promise<video_info_t> => {
+export const get_play_url = async (rid: string, use_cdn: boolean, bitrate = 8000, domain: string | null = null): Promise<video_info_t> => {
   const title = (room: room_info_t) => {
     const open_time = moment(room.showTime * 1000).format('YYYY-MM-DD HH:mm:ss');
     return `斗鱼 - ${room.rid}|${room.nickname}|${room.cate2Name} - [${open_time}]`;
@@ -177,7 +174,10 @@ export const get_play_url = async (rid: string, use_cdn: boolean, bitrate = 8000
   const steam_title = title(room_info) + ' - ' + key;
   let video_url = url;
   if (use_cdn) {
-    const host = new URL(url!).hostname;
+    let host = new URL(url!).hostname;
+    if (domain) {
+      host = domain;
+    }
     video_url = `http://${host}/live/${key}_${bitrate}.xs`;
   }
   
@@ -185,17 +185,4 @@ export const get_play_url = async (rid: string, use_cdn: boolean, bitrate = 8000
     title: steam_title,
     video: video_url,
   };
-
-  // {
-  //   // get key from web preview
-  //   const { error, key } = await get_stream_key_from_preview(real_rid);
-  //   if (!error) {
-  //     return {
-  //       title: title(room_info) + ' - ' + key,
-  //       video: `${URL_PRE}/live/${key}_8000.xs`,
-  //     };
-  //   } else {
-  //     console.log('failed to get stream key from preview:', error);
-  //   }
-  // }
 }
