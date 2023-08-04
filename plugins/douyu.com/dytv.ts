@@ -103,7 +103,7 @@ const get_stream_from_pc_page = async (rid: string, html: string): Promise<strea
       error: 'failed to search func',
     };
   }
-  const func_ub9 = match_func[1].replace(/eval.*;}/, 'strc;}');
+  const func_ub9 = match_func[1].replace(/eval.*?;}/g, 'strc;}');
   const ret = eval(`${func_ub9} ub98484234()`);
 
   const match_v = ret.match(/v=(\d+)/);
