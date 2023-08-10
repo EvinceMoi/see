@@ -39,7 +39,7 @@ const get_room_info = (html: string): room_info_t => {
   const page_context_node = doc.querySelector('script[id="vite-plugin-ssr_pageContext"][type="application/json"]');
   if (!page_context_node) throw new Error('failed to get page context');
   const page_context = JSON.parse(page_context_node.textContent);
-  return page_context.pageContext.pageProps.room.roomInfo.roomInfo as room_info_t;
+  return page_context.pageProps.room.roomInfo.roomInfo as room_info_t;
 }
 
 interface stream_info_t {
