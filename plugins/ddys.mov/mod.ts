@@ -4,7 +4,7 @@ import { plugin_t } from '@utils/types.ts';
 import { get_playlist, get_video_info, open_page } from './ddys.ts';
 import { Page } from 'puppeteer';
 
-const DOMAIN_NAME = `ddys.art`;
+const DOMAIN_NAME = `ddys.mov`;
 
 const ddys = new Command()
   .version('0.0.1')
