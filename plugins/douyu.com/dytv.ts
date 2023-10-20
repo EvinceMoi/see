@@ -36,7 +36,7 @@ const get_pc_page = async (rid: string): Promise<string> => {
 }
 const get_room_info = (html: string): room_info_t => {
   const doc = new DOMParser().parseFromString(html, 'text/html')!;
-  const page_context_node = doc.querySelector('script[id="vite-plugin-ssr_pageContext"][type="application/json"]');
+  const page_context_node = doc.querySelector('script[id="vike_pageContext"][type="application/json"]');
   if (!page_context_node) throw new Error('failed to get page context');
   const page_context = JSON.parse(page_context_node.textContent);
   return page_context.pageProps.room.roomInfo.roomInfo as room_info_t;
