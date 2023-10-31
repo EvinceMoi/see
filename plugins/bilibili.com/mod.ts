@@ -22,7 +22,6 @@ const bili = new Command()
 
       if (is_int(uri)) {
         const vi = await get_live_info(parseInt(uri));
-        console.log('play url:', vi.video);
         await play_video(vi);
       } else {
         let u: URL;
