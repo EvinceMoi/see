@@ -166,7 +166,7 @@ export const ensure_login = async () => {
     const last_login = Number(last_login_value);
     const days = Math.ceil((ts() - last_login) / 24 / 60 / 60);
     console.log(`last login ${days} days before`);
-    if (days > 100) {
+    if (days > 30) {
       // refresh info
       console.log('refresh tokens');
       const ok = await _do_refresh_auth();

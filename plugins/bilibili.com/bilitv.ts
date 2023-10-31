@@ -97,9 +97,16 @@ export const get_video_info = async (url: string): Promise<video_info_t> => {
 }
 
 export const get_live_info = async (rid: number): Promise<video_info_t> => {
+  const cookie_file = join(configDir(plug_name), 'cookies');
+  const cookies = await Deno.readTextFile(cookie_file);
+  const cookie_header = {
+    'Cookie': cookies
+  };
+
   const room_info_res = await fetch(`https://api.live.bilibili.com/room/v1/Room/room_init?id=${rid}`, {
     headers: {
-      ...USER_AGENT
+      ...USER_AGENT,
+      ...cookie_header,
     }
   });
   const room_info = await room_info_res.json();
@@ -138,7 +145,8 @@ export const get_live_info = async (rid: number): Promise<video_info_t> => {
   });
   const res = await fetch(play_info_url + '?' + params, {
     headers: {
-      ...USER_AGENT
+      ...USER_AGENT,
+      ...cookie_header,
     }
   });
   const sinfo = await res.json();

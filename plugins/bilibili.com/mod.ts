@@ -16,15 +16,15 @@ const bili = new Command()
   .arguments('<uri:string>')
   .action(async (opts, uri) => {
     try {
+      if (opts.login) {
+        await ensure_login();
+      }
+
       if (is_int(uri)) {
         const vi = await get_live_info(parseInt(uri));
         console.log('play url:', vi.video);
         await play_video(vi);
       } else {
-        if (opts.login) {
-          await ensure_login();
-        }
-
         let u: URL;
         if (uri.startsWith('http')) {
           u = new URL(uri);
