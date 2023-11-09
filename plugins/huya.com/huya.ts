@@ -20,12 +20,6 @@ const get_mobile_page = async (rid: string): Promise<string> => {
   return await fetch_html(`https://m.huya.com/${rid}`);
 }
 
-interface stream_info_t {
-  error?: string,
-  key?: string,
-  url?: string,
-}
-
 const get_uid = async (): Promise<string> => {
   const resp = await fetch(`https://udblgn.huya.com/web/anonymousLogin`, {
     method: 'POST',
