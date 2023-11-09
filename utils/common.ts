@@ -79,6 +79,9 @@ export const set_term_title = (title: string) => {
   Deno.stdout.writeSync(new TextEncoder().encode(buf));
 };
 
-export const USER_AGENT = {
-  'User-Agenet': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
+export const PC_USER_AGENT = {
+  'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
+};
+export const MOBILE_USER_AGENT = {
+  'User-Agent': 'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Mobile Safari/537.36'
 };

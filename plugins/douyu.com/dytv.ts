@@ -1,7 +1,7 @@
 import { encode, Hash } from 'checksum';
 import { DOMParser } from 'deno_dom';
 import moment from 'moment';
-import { video_info_t, USER_AGENT } from '@utils/common.ts';
+import { video_info_t, PC_USER_AGENT } from '@utils/common.ts';
 
 const md5sum = (data: string) => {
   return new Hash('md5').digest(encode(data)).hex();
@@ -23,7 +23,7 @@ interface room_info_t {
 const fetch_html = async (url: string): Promise<string> => {
   const resp = await fetch(url, {
     headers: {
-      ...USER_AGENT
+      ...PC_USER_AGENT
     }
   });
   return resp.text();
@@ -65,7 +65,7 @@ const get_stream_key_from_preview = async (rid: string): Promise<stream_info_t> 
   const resp = await fetch(url, {
     method: 'POST',
     headers: {
-      ...USER_AGENT,
+      ...PC_USER_AGENT,
       ...headers
     },
     body: new URLSearchParams(data)

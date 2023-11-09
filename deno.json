@@ -8,7 +8,7 @@
   "imports": {
     "@utils/": "./utils/",
     "cliffy/": "https://deno.land/x/cliffy@v0.25.7/",
-    "std/": "https://deno.land/std@0.184.0/",
+    "std/": "https://deno.land/std@0.205.0/",
     "moment": "https://deno.land/x/momentjs@2.29.1-deno/mod.ts",
     "checksum": "https://deno.land/x/checksum@1.2.0/mod.ts",
     "qrcode": "https://deno.land/x/qrcode_terminal@v1.1.1/mod.js",
