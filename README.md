@@ -37,6 +37,7 @@ $ see --help
 
     dytv  <rid>                    - play douyu live
     bili  <uri>                    - play bilibili video
+    huya  <rid>                    - play huya live
     ddys  <uri_or_name> [episode]  - play ddys video
 ```
 ```sh
