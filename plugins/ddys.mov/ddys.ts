@@ -21,7 +21,8 @@ export const open_page = async (url: string): Promise<Page> => {
   });
   const page = await browser.newPage();
   // bypass cloudflare challenge, see `https://stackoverflow.com/a/71929124`
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
+  // await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
+  await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36');
   await page.setViewport({ width: 1920, height: 1080 }); 
   await page.goto(url);
   await page.waitForSelector('.site-title')
