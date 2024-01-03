@@ -11,30 +11,13 @@ const selectors = {
   video: '#vjsp_html5_api',
 };
 
-export const open_page = async (url: string): Promise<Page> => {
-  const browser = await puppeteer.launch({
-    defaultViewport: {
-      width: 1920,
-      height: 1080,
-    },
-    args: ["--headless=new"],
-  });
-  const page = await browser.newPage();
-  // bypass cloudflare challenge, see `https://stackoverflow.com/a/71929124`
-  // await page.setUserAgent('Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0');
-  await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36');
-  await page.setViewport({ width: 1920, height: 1080 }); 
-  await page.goto(url);
-  await page.waitForSelector('.site-title')
-  return page;
-};
-
 interface playlist_item_t {
   caption: string;
   selected: boolean;
   el?: ElementHandle<any>;
 }
-export const get_playlist = async (page: Page, with_element = false) => {
+export const get_playlist = async (page: Page, uri: string, with_element = false) => {
+  await page.goto(uri);
   await page.waitForSelector(selectors.playlist_contianer); // wait for playlist
   const playlist_items = await page.$$(selectors.playlist_item);
   const playlist = await Promise.all(playlist_items.map(async it => {
@@ -56,15 +39,13 @@ export const get_playlist = async (page: Page, with_element = false) => {
   return playlist;
 };
 
-export const get_video_info = async (page: Page, playlist_idx: number): Promise<video_info_t> => {
-  const playlist = await get_playlist(page, true);
+export const get_video_info = async (page: Page, playlist: playlist_item_t[], playlist_idx: number): Promise<video_info_t> => {
   if (playlist_idx >= playlist.length) throw new Error(`no such index: ${playlist_idx}`);
 
   const episode = playlist[playlist_idx];
   await episode.el!.click();
 
   // await el.click();
-  console.log('playing episode:', episode.caption);
 
   // click play button
   const pp_selector = '.vjs-icon-placeholder';

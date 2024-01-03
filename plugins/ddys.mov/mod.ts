@@ -1,8 +1,7 @@
 import { Command } from 'cliffy/command/mod.ts';
-import { play_video, seq } from '@utils/common.ts';
+import { play_video, seq, with_browser, with_page } from '@utils/common.ts';
 import { plugin_t } from '@utils/types.ts';
-import { get_playlist, get_video_info, open_page } from './ddys.ts';
-import { Page } from 'puppeteer';
+import { get_playlist, get_video_info, } from './ddys.ts';
 
 const DOMAIN_NAME = `ddys.mov`;
 
@@ -20,28 +19,20 @@ const ddys = new Command()
         uri += `?ep=${episode}`
       }
     }
-    let page: Page | undefined;
-    try {
-      console.log('open uri:', uri);
-      page = await open_page(uri);
-      const playlist = await get_playlist(page);
-      console.log('playlist:', playlist.map(p => p.caption));
 
-      const selected_idx = playlist.findIndex(p => p.selected);
-      for (const idx of seq(selected_idx)) {
-        const vi = await get_video_info(page, idx);
-        await play_video(vi);
-      }
-    } catch (e) {
-      console.log(e.message);
-    } finally {
-      if (page) {
-        const browser = page.browser();
-        await page.close();
-        await browser.close();
-      }
-      Deno.exit(1);
-    }
+    await with_browser(async (browser) => {
+      await with_page(browser, async (page) => {
+        console.log('open uri:', uri);
+        const playlist = await get_playlist(page, uri, true);
+        console.log('playlist:', playlist.map(p => p.caption));
+
+        const selected_idx = playlist.findIndex(p => p.selected);
+        for (const idx of seq(selected_idx, playlist.length)) {
+          const vi = await get_video_info(page, playlist, idx);
+          await play_video(vi);
+        }
+      });
+    });
   });
 
   const plugin: plugin_t = {

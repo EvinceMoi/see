@@ -85,7 +85,7 @@ export const set_term_title = (title: string) => {
 };
 
 export const PC_USER_AGENT = {
-  'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
+  'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36'
 };
 export const MOBILE_USER_AGENT = {
   'User-Agent': 'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Mobile Safari/537.36'
@@ -108,7 +108,7 @@ export const with_browser = async (cb: (browser: Browser) => Promise<void>) => {
 }
 export const with_page = async <T>(browser: Browser, cb: (page: Page) => Promise<T>) => {
   const page = await browser.newPage();
-  await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36');
+  await page.setUserAgent(PC_USER_AGENT["User-Agent"]);
   await page.setViewport({ width: 1920, height: 1080 }); 
 
   let ret: T;

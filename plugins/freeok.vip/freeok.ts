@@ -42,18 +42,33 @@ export const get_playlist = async (id: string): Promise<playlist_item_t[]> => {
 export const get_play_url = async (page: Page, ep: playlist_item_t): Promise<video_info_t> => {
   await page.goto(ep.url);
 
-  const selector = `#playleft > iframe`;
-  await page.waitForSelector(selector);
-  const iframe = await page.$(selector)!;
+  const selector_if = `#playleft > iframe`;
+  const iframe = await page.waitForSelector(selector_if);
   if (!iframe) throw new Error('iframe not found');
 
   const src = await iframe.evaluate(el => el.getAttribute('src'));
   const url = new URL(src, BASE_URL);
-  const play_url = url.searchParams.get('url');
-  if (!play_url) throw new Error('video url not found');
+  const purl = url.searchParams.get('url');
+  if (!purl) throw new Error('video url not found');
 
-  return {
-    title: ep.title + '|' + ep.name,
-    video: play_url,
+  const title = ep.title + '|' + ep.name;
+  if (purl.startsWith('http')) {
+    return {
+      title,
+      video: purl,
+    }
+  } else {
+    const frame = await iframe.contentFrame();
+    if (!frame) throw new Error('iframe content not found');
+
+    const selector_vi = `div.video-wrapper > video`;
+    const video = await frame.waitForSelector(selector_vi);
+    if (!video) throw new Error('video tag not found');
+    const src = await video.evaluate(el => el.getAttribute('src'));
+    console.log(src);
+    return {
+      title,
+      video: src
+    }
   }
 };
