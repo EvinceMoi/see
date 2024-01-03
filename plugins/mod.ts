@@ -4,12 +4,14 @@ import { plugin_t } from '@utils/types.ts';
 import plug_douyu_com from './douyu.com/mod.ts';
 import plug_bilibili_com from './bilibili.com/mod.ts';
 import plug_huya_com from './huya.com/mod.ts';
+import plug_freeok_vip from './freeok.vip/mod.ts';
 import plug_ddys_mov from './ddys.mov/mod.ts';
 
 const plugins: plugin_t[] = [
   plug_douyu_com,
   plug_bilibili_com,
   plug_huya_com,
+  plug_freeok_vip,
   plug_ddys_mov,
 ];
 
