@@ -3,7 +3,7 @@ import { play_video, seq, with_browser, with_page } from '@utils/common.ts';
 import { plugin_t } from '@utils/types.ts';
 import { get_playlist, get_video_info, } from './ddys.ts';
 
-const DOMAIN_NAME = `ddys.mov`;
+const DOMAIN_NAME = `ddys.pro`;
 
 const ddys = new Command()
   .version('0.0.1')
