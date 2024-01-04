@@ -17,10 +17,10 @@ const huya = new Command()
     }
   });
 
-  const plugin: plugin_t = {
-    id: 'huya',
-    matches: ['huya.com'],
-    cmd: huya,
-  };
+const plugin: plugin_t = {
+  id: 'huya',
+  matches: ['huya.com'],
+  cmd: huya,
+};
 
-  export default plugin;
+export default plugin;

@@ -34,10 +34,10 @@ const freeok = new Command()
     }
   });
 
-  const plugin: plugin_t = {
-    id: 'freeok',
-    matches: ['freeok.vip', 'freeok.pro'],
-    cmd: freeok,
-  };
+const plugin: plugin_t = {
+  id: 'freeok',
+  matches: ['freeok.vip', 'freeok.pro'],
+  cmd: freeok,
+};
 
-  export default plugin;
+export default plugin;

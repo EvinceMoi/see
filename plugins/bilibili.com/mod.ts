@@ -1,13 +1,12 @@
-
 import { plugin_t } from '@utils/types.ts';
 import { Command } from 'cliffy/command/mod.ts';
 import { ensure_login } from './login.ts';
-import { get_video_info, get_live_info } from './bilitv.ts';
+import { get_live_info, get_video_info } from './bilitv.ts';
 import { play_video } from '@utils/common.ts';
 
-const is_int = s => {
+const is_int = (s) => {
   return !isNaN(s) && !isNaN(parseInt(s));
-}
+};
 
 const bili = new Command()
   .version('0.0.1')

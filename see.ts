@@ -7,14 +7,12 @@ const see = new Command()
   .description('play streams')
   .meta('deno', Deno.version.deno)
   .meta('v8', Deno.version.v8)
-  .meta('typescript', Deno.version.typescript)
-;
+  .meta('typescript', Deno.version.typescript);
 see.action(() => {
   see.showHelp();
 });
-  
 
-plugins.forEach(p => {
+plugins.forEach((p) => {
   see.command(p.id, p.cmd);
 });
 

@@ -1,7 +1,7 @@
 import { Command } from 'cliffy/command/mod.ts';
 import { play_video, seq, with_browser, with_page } from '@utils/common.ts';
 import { plugin_t } from '@utils/types.ts';
-import { get_playlist, get_video_info, } from './ddys.ts';
+import { get_playlist, get_video_info } from './ddys.ts';
 
 const DOMAIN_NAME = `ddys.pro`;
 
@@ -16,7 +16,7 @@ const ddys = new Command()
     } else {
       uri = `https://${DOMAIN_NAME}/${uri_or_name}`;
       if (episode != undefined) {
-        uri += `?ep=${episode}`
+        uri += `?ep=${episode}`;
       }
     }
 
@@ -24,9 +24,9 @@ const ddys = new Command()
       await with_page(browser, async (page) => {
         console.log('open uri:', uri);
         const playlist = await get_playlist(page, uri, true);
-        console.log('playlist:', playlist.map(p => p.caption));
+        console.log('playlist:', playlist.map((p) => p.caption));
 
-        const selected_idx = playlist.findIndex(p => p.selected);
+        const selected_idx = playlist.findIndex((p) => p.selected);
         for (const idx of seq(selected_idx, playlist.length)) {
           const vi = await get_video_info(page, playlist, idx);
           await play_video(vi);
@@ -35,10 +35,10 @@ const ddys = new Command()
     });
   });
 
-  const plugin: plugin_t = {
-    id: 'ddys',
-    matches: [DOMAIN_NAME],
-    cmd: ddys,
-  };
+const plugin: plugin_t = {
+  id: 'ddys',
+  matches: [DOMAIN_NAME],
+  cmd: ddys,
+};
 
-  export default plugin;
+export default plugin;

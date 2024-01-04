@@ -24,10 +24,10 @@ const douyu = new Command()
     }
   });
 
-  const plugin: plugin_t = {
-    id: 'dytv',
-    matches: ['douyu.com'],
-    cmd: douyu,
-  };
+const plugin: plugin_t = {
+  id: 'dytv',
+  matches: ['douyu.com'],
+  cmd: douyu,
+};
 
-  export default plugin;
+export default plugin;

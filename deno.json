@@ -23,5 +23,10 @@
       "DOM"
     ],
     "noImplicitAny": false
+  },
+  "fmt": {
+    "options": {
+      "singleQuote": true
+    }
   }
 }

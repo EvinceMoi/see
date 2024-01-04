@@ -1,11 +1,11 @@
 import { encode, Hash } from 'checksum';
 import { DOMParser } from 'deno_dom';
 import moment from 'moment';
-import { video_info_t, PC_USER_AGENT } from '@utils/common.ts';
+import { PC_USER_AGENT, video_info_t } from '@utils/common.ts';
 
 const md5sum = (data: string) => {
   return new Hash('md5').digest(encode(data)).hex();
-}
+};
 
 const RE_KEY = /(\d{1,9}[0-9a-zA-Z]+)_?\d{0,4}p?(\/playlist|.m3u8|.flv)/;
 const DID = '10000000000000000000000000001501';
@@ -23,32 +23,36 @@ interface room_info_t {
 const fetch_html = async (url: string): Promise<string> => {
   const resp = await fetch(url, {
     headers: {
-      ...PC_USER_AGENT
-    }
+      ...PC_USER_AGENT,
+    },
   });
   return resp.text();
-}
+};
 const get_mobile_page = async (rid: string): Promise<string> => {
   return await fetch_html(`https://m.douyu.com/${rid}`);
-}
+};
 const get_pc_page = async (rid: string): Promise<string> => {
   return await fetch_html(`https://www.douyu.com/${rid}`);
-}
+};
 const get_room_info = (html: string): room_info_t => {
   const doc = new DOMParser().parseFromString(html, 'text/html')!;
-  const page_context_node = doc.querySelector('script[id="vike_pageContext"][type="application/json"]');
+  const page_context_node = doc.querySelector(
+    'script[id="vike_pageContext"][type="application/json"]',
+  );
   if (!page_context_node) throw new Error('failed to get page context');
   const page_context = JSON.parse(page_context_node.textContent);
   return page_context.pageProps.room.roomInfo.roomInfo as room_info_t;
-}
+};
 
 interface stream_info_t {
-  error?: string,
-  key?: string,
-  url?: string,
+  error?: string;
+  key?: string;
+  url?: string;
 }
 // deno-lint-ignore no-unused-vars
-const get_stream_key_from_preview = async (rid: string): Promise<stream_info_t> => {
+const get_stream_key_from_preview = async (
+  rid: string,
+): Promise<stream_info_t> => {
   const url = `https://playweb.douyucdn.cn/lapi/live/hlsH5Preview/${rid}`;
   const data = {
     rid,
@@ -59,16 +63,16 @@ const get_stream_key_from_preview = async (rid: string): Promise<stream_info_t> 
   const headers = {
     rid,
     time: now,
-    auth
+    auth,
   };
 
   const resp = await fetch(url, {
     method: 'POST',
     headers: {
       ...PC_USER_AGENT,
-      ...headers
+      ...headers,
     },
-    body: new URLSearchParams(data)
+    body: new URLSearchParams(data),
   });
   const body = await resp.json();
   if (body.error != 0) {
@@ -80,7 +84,7 @@ const get_stream_key_from_preview = async (rid: string): Promise<stream_info_t> 
   const {
     // rtmp_cdn,
     // rtmp_url,
-    rtmp_live
+    rtmp_live,
   } = body.data;
 
   const match = rtmp_live.match(RE_KEY);
@@ -92,12 +96,17 @@ const get_stream_key_from_preview = async (rid: string): Promise<stream_info_t> 
 
   const [_, key, _suffix] = match;
   return {
-    key
+    key,
   };
-}
+};
 
-const get_stream_from_pc_page = async (rid: string, html: string): Promise<stream_info_t> => {
-  const match_func = html.match(/(var vdwdae325w_64we[\s\S]*function ub98484234[\s\S]*?)function/);
+const get_stream_from_pc_page = async (
+  rid: string,
+  html: string,
+): Promise<stream_info_t> => {
+  const match_func = html.match(
+    /(var vdwdae325w_64we[\s\S]*function ub98484234[\s\S]*?)function/,
+  );
   if (!match_func) {
     return {
       error: 'failed to search func',
@@ -124,20 +133,21 @@ const get_stream_from_pc_page = async (rid: string, html: string): Promise<strea
   const sign = eval(`${func_sign} sign('${rid}', '${DID}', '${ns}')`);
   // cdn: cdn: 主线路ws-h5, 备用线路tct-h5
   // rate: 1流畅, 2高清, 3超清, 4蓝光4M, 0蓝光8M或10M
-  const cdn = `ws-h5`; const rate = `-1`;
+  const cdn = `ws-h5`;
+  const rate = `-1`;
   const params = `${sign}&cdn=${cdn}&rate=${rate}`;
   const api_url = `https://www.douyu.com/lapi/live/getH5Play/${rid}`;
   const resp = await fetch(api_url, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
     },
-    body: params
+    body: params,
   });
   const res = await resp.json();
   if (res.error !== 0) {
     return {
-      error: JSON.stringify(res)
+      error: JSON.stringify(res),
     };
   }
   /*
@@ -164,10 +174,13 @@ const get_stream_from_pc_page = async (rid: string, html: string): Promise<strea
   return {
     key,
     url,
-  }
-}
+  };
+};
 
-const get_stream_from_mobile_page = async (rid: string, html: string): Promise<stream_info_t> => {
+const get_stream_from_mobile_page = async (
+  rid: string,
+  html: string,
+): Promise<stream_info_t> => {
   const match_func = html.match(/(function ub98484234.*)\s(var.*)/);
   if (!match_func) {
     return {
@@ -197,14 +210,14 @@ const get_stream_from_mobile_page = async (rid: string, html: string): Promise<s
   const resp = await fetch('https://m.douyu.com/api/room/ratestream', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
     },
-    body: params
+    body: params,
   });
   const res = await resp.json();
   if (res.code !== 0) {
     return {
-      error: JSON.stringify(res)
+      error: JSON.stringify(res),
     };
   }
   /*
@@ -233,12 +246,17 @@ const get_stream_from_mobile_page = async (rid: string, html: string): Promise<s
   return {
     key,
     url,
-  }
-}
+  };
+};
 
-export const get_play_url = async (rid: string, cdn_host: string | null = null): Promise<video_info_t> => {
+export const get_play_url = async (
+  rid: string,
+  cdn_host: string | null = null,
+): Promise<video_info_t> => {
   const title = (room: room_info_t) => {
-    const open_time = moment(room.showTime * 1000).format('YYYY-MM-DD HH:mm:ss');
+    const open_time = moment(room.showTime * 1000).format(
+      'YYYY-MM-DD HH:mm:ss',
+    );
     return `斗鱼 - ${room.rid}|${room.nickname}|${room.cate2Name} - [${open_time}]`;
   };
 
@@ -252,19 +270,23 @@ export const get_play_url = async (rid: string, cdn_host: string | null = null):
   if (cdn_host) {
     // 使用自定义cdn
     const { error, key } = await get_stream_from_mobile_page(real_rid, html);
-    if (error) throw new Error(`failed to get stream info from mobile page: ${error}`);
+    if (error) {
+      throw new Error(`failed to get stream info from mobile page: ${error}`);
+    }
     stream_title += ' - ' + key;
     video_url = `http://${cdn_host}/live/${key}_8000.xs`;
   } else {
     const page = await get_pc_page(rid);
     const { error, key, url } = await get_stream_from_pc_page(real_rid, page);
-    if (error) throw new Error(`failed to get stream info from pc page: ${error}`);
+    if (error) {
+      throw new Error(`failed to get stream info from pc page: ${error}`);
+    }
     stream_title += ' - ' + key;
     video_url = url!;
   }
-  
+
   return {
     title: stream_title,
     video: video_url,
   };
-}
+};

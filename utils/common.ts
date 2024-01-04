@@ -1,12 +1,16 @@
-import { join } from "std/path/mod.ts";
-import puppeteer, { Browser, Page } from "puppeteer";
+import { join } from 'std/path/mod.ts';
+import puppeteer, { Browser, Page } from 'puppeteer';
 
 export const configDir = (plugin: string) => {
   const home = Deno.env.get('HOME')!;
   return `${home}/.config/stream/${plugin}`;
 };
 
-export const loadConfigFile = (plugin: string, file: string, json = false): string | null => {
+export const loadConfigFile = (
+  plugin: string,
+  file: string,
+  json = false,
+): string | null => {
   const file_path = join(configDir(plugin), file);
   try {
     const content = Deno.readTextFileSync(file_path);
@@ -20,7 +24,11 @@ export const loadConfigFile = (plugin: string, file: string, json = false): stri
   }
 };
 
-export const saveConfigFile = (plugin: string, file: string, content: string): boolean => {
+export const saveConfigFile = (
+  plugin: string,
+  file: string,
+  content: string,
+): boolean => {
   const file_path = join(configDir(plugin), file);
   try {
     Deno.writeTextFileSync(file_path, content);
@@ -71,12 +79,13 @@ export const seq = (start = 0, end: number | undefined = undefined) => {
       while (true) {
         yield start++;
         if (end) {
-          if (start >= end)
+          if (start >= end) {
             break;
+          }
         }
       }
-    }
-  }
+    },
+  };
 };
 
 export const set_term_title = (title: string) => {
@@ -85,10 +94,12 @@ export const set_term_title = (title: string) => {
 };
 
 export const PC_USER_AGENT = {
-  'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36'
+  'User-Agent':
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
 };
 export const MOBILE_USER_AGENT = {
-  'User-Agent': 'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Mobile Safari/537.36'
+  'User-Agent':
+    'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Mobile Safari/537.36',
 };
 
 export const with_browser = async (cb: (browser: Browser) => Promise<void>) => {
@@ -105,11 +116,14 @@ export const with_browser = async (cb: (browser: Browser) => Promise<void>) => {
   } finally {
     await browser.close();
   }
-}
-export const with_page = async <T>(browser: Browser, cb: (page: Page) => Promise<T>) => {
+};
+export const with_page = async <T>(
+  browser: Browser,
+  cb: (page: Page) => Promise<T>,
+) => {
   const page = await browser.newPage();
-  await page.setUserAgent(PC_USER_AGENT["User-Agent"]);
-  await page.setViewport({ width: 1920, height: 1080 }); 
+  await page.setUserAgent(PC_USER_AGENT['User-Agent']);
+  await page.setViewport({ width: 1920, height: 1080 });
 
   let ret: T;
   try {
@@ -119,4 +133,4 @@ export const with_page = async <T>(browser: Browser, cb: (page: Page) => Promise
   }
 
   return ret;
-}
+};
