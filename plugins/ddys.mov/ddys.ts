@@ -18,10 +18,7 @@ interface playlist_item_t {
 }
 export const get_playlist = async (
   page: Page,
-  uri: string,
-  with_element = false,
 ) => {
-  await page.goto(uri);
   await page.waitForSelector(selectors.playlist_contianer); // wait for playlist
   const playlist_items = await page.$$(selectors.playlist_item);
   const playlist = await Promise.all(playlist_items.map(async (it) => {
@@ -35,10 +32,8 @@ export const get_playlist = async (
     const ret: playlist_item_t = {
       caption: text,
       selected,
+      el: it,
     };
-    if (with_element) {
-      ret.el = it;
-    }
     return ret;
   }));
 
@@ -47,9 +42,9 @@ export const get_playlist = async (
 
 export const get_video_info = async (
   page: Page,
-  playlist: playlist_item_t[],
   playlist_idx: number,
 ): Promise<video_info_t> => {
+  const playlist = await get_playlist(page);
   if (playlist_idx >= playlist.length) {
     throw new Error(`no such index: ${playlist_idx}`);
   }

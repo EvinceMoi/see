@@ -23,12 +23,14 @@ const ddys = new Command()
     await with_browser(async (browser) => {
       await with_page(browser, async (page) => {
         console.log('open uri:', uri);
-        const playlist = await get_playlist(page, uri, true);
+        await page.goto(uri);
+
+        const playlist = await get_playlist(page);
         console.log('playlist:', playlist.map((p) => p.caption));
 
         const selected_idx = playlist.findIndex((p) => p.selected);
         for (const idx of seq(selected_idx, playlist.length)) {
-          const vi = await get_video_info(page, playlist, idx);
+          const vi = await get_video_info(page, idx);
           await play_video(vi);
         }
       });
