@@ -19,7 +19,13 @@ interface playlist_item_t {
 export const get_playlist = async (
   page: Page,
 ) => {
-  await page.waitForSelector(selectors.playlist_contianer); // wait for playlist
+  try {
+    await page.waitForSelector(selectors.playlist_contianer); // wait for playlist
+  } catch (e) {
+    await page.screenshot({ path: 'ddys.png' });
+    const content = await page.content();
+    console.log('page content:', content);
+  }
   const playlist_items = await page.$$(selectors.playlist_item);
   const playlist = await Promise.all(playlist_items.map(async (it) => {
     const div_class: string = await it.evaluate((el) =>

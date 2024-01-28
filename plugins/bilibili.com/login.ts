@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import { crypto, toHashString } from 'std/crypto/mod.ts';
+import { crypto, } from 'std/crypto/mod.ts';
+import { encodeHex } from 'std/encoding/hex.ts';
 import { ensureDirSync } from 'std/fs/ensure_dir.ts';
 import qrcode from 'qrcode';
 import { configDir, loadConfigFile, saveConfigFile } from '@utils/common.ts';
@@ -20,7 +21,7 @@ const show_qrcode = (content: string) => {
 
 const md5sum = (data: string) => {
   const hash = crypto.subtle.digestSync('MD5', new TextEncoder().encode(data));
-  return toHashString(hash, 'hex');
+  return encodeHex(hash);
 };
 
 const bilitv_sign = (params: params_t) => {

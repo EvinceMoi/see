@@ -8,11 +8,12 @@
   "imports": {
     "@utils/": "./utils/",
     "cliffy/": "https://deno.land/x/cliffy@v0.25.7/",
-    "std/": "https://deno.land/std@0.205.0/",
+    "std/": "https://deno.land/std@0.213.0/",
     "moment": "https://deno.land/x/momentjs@2.29.1-deno/mod.ts",
     "checksum": "https://deno.land/x/checksum@1.2.0/mod.ts",
     "qrcode": "https://deno.land/x/qrcode_terminal@v1.1.1/mod.js",
-    "puppeteer": "https://deno.land/x/puppeteer@16.2.0/mod.ts",
+    // "puppeteer": "https://deno.land/x/puppeteer@16.2.0/mod.ts",
+    "puppeteer": "https://deno.land/x/puppeteer_plus@0.19.0/mod.ts",
     "deno_dom": "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts",
     "cheerio": "https://deno.land/x/cheerio@1.0.7/mod.ts"
   },
