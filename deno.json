@@ -3,7 +3,7 @@
     "dev": "deno run -A",
     "plugin-export": "deno run -A tools/plugin.ts ./plugins",
     "start": "deno run --allow-all see.ts",
-    "build": "deno compile --allow-all --unstable -o build/see see.ts"
+    "build": "deno compile --allow-all -o build/see see.ts"
   },
   "imports": {
     "@utils/": "./utils/",
@@ -17,6 +17,10 @@
     "deno_dom": "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts",
     "cheerio": "https://deno.land/x/cheerio@1.0.7/mod.ts"
   },
+  "unstable": [
+    "bare-node-builtins"
+    // "byonm"
+  ],
   "compilerOptions": {
     "lib": [
       "deno.window",

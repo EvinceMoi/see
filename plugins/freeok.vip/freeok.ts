@@ -49,7 +49,7 @@ export const get_play_url = async (
   const iframe = await page.waitForSelector(selector_if);
   if (!iframe) throw new Error('iframe not found');
 
-  const src = await iframe.evaluate((el) => el.getAttribute('src'));
+  const src = await iframe.evaluate((el) => el.getAttribute('src') || '');
   const url = new URL(src, BASE_URL);
   const purl = url.searchParams.get('url');
   if (!purl) throw new Error('video url not found');
@@ -67,7 +67,7 @@ export const get_play_url = async (
     const selector_vi = `div.video-wrapper > video`;
     const video = await frame.waitForSelector(selector_vi);
     if (!video) throw new Error('video tag not found');
-    const src = await video.evaluate((el) => el.getAttribute('src'));
+    const src = await video.evaluate((el) => el.getAttribute('src') || '');
     console.log(src);
     return {
       title,

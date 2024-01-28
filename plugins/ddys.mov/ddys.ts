@@ -19,21 +19,15 @@ interface playlist_item_t {
 export const get_playlist = async (
   page: Page,
 ) => {
-  try {
-    await page.waitForSelector(selectors.playlist_contianer); // wait for playlist
-  } catch (e) {
-    await page.screenshot({ path: 'ddys.png' });
-    const content = await page.content();
-    console.log('page content:', content);
-  }
+  await page.waitForSelector(selectors.playlist_contianer); // wait for playlist
   const playlist_items = await page.$$(selectors.playlist_item);
   const playlist = await Promise.all(playlist_items.map(async (it) => {
     const div_class: string = await it.evaluate((el) =>
-      el.getAttribute('class')
+      el.getAttribute('class') || ''
     );
     const selected = div_class.includes(selectors.playlist_playing);
 
-    let text: string = await it.evaluate((el) => el.textContent);
+    let text: string = await it.evaluate((el) => el.textContent || '');
     text = text.replace(/[\n\t]+/g, '');
     const ret: playlist_item_t = {
       caption: text,
@@ -79,7 +73,7 @@ export const get_video_info = async (
   }, {
     timeout: 60 * 1000,
   }, vp);
-  const src = await el_video.evaluate((el) => el.getAttribute('src'));
+  const src = await el_video.evaluate((el) => el.getAttribute('src') || '');
   console.log('episode', episode.caption, 'play url:', src);
   await el_video.click(); // pause video
   return {
