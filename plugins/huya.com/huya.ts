@@ -90,6 +90,7 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
 
   const rnick = room_info['tLiveInfo']['sNick'];
   const rgame = room_info['tLiveInfo']['sGameFullName'];
+  const rdesc = room_info['tLiveInfo']['sIntroduction'];
   const start_time = moment(room_info['tLiveInfo']['iStartTime'] * 1000).format(
     'YYYY-MM-DD HH:mm:ss',
   );
@@ -117,7 +118,7 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
   const url = extract_url(stream);
 
   return {
-    title: `虎牙 - ${rid}|${rnick}|${rgame} - [${start_time}]`,
+    title: `虎牙 - ${rid}|${rnick} - ${rdesc}|${rgame} - [${start_time}]`,
     video: url,
   };
 };
