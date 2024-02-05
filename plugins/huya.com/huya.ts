@@ -20,22 +20,24 @@ const get_mobile_page = async (rid: string): Promise<string> => {
   return await fetch_html(`https://m.huya.com/${rid}`);
 };
 
+// deno-lint-ignore require-await
 const get_uid = async (): Promise<string> => {
-  const resp = await fetch(`https://udblgn.huya.com/web/anonymousLogin`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      appId: 5002,
-      byPass: 4,
-      context: '',
-      version: '2.4',
-      data: {},
-    }),
-  });
-  const json = await resp.json();
-  return json['data']['uid'];
+  return '0';
+  // const resp = await fetch(`https://udblgn.huya.com/web/anonymousLogin`, {
+  //   method: 'POST',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   },
+  //   body: JSON.stringify({
+  //     appId: 5002,
+  //     byPass: 4,
+  //     context: '',
+  //     version: '2.4',
+  //     data: {},
+  //   }),
+  // });
+  // const json = await resp.json();
+  // return json['data']['uid'];
 };
 
 const gen_anti_code = (code: string, sname: string, uid: string) => {
@@ -46,10 +48,11 @@ const gen_anti_code = (code: string, sname: string, uid: string) => {
   }) as [string, string][];
   const map = new Map([...kv]);
   map.set('ver', '1');
-  map.set('sv', '2110211124');
-  map.set('seqid', uid + Date.now().toString());
+  map.set('seqid', Date.now().toString());
   map.set('uid', uid);
-  map.set('uuid', crypto.randomUUID());
+  map.set('uuid', '0');
+  map.set('ctype', 'huya_live');
+  map.set('t', '100');
 
   const md5 = md5sum(`${map.get('seqid')}|${map.get('ctype')}|${map.get('t')}`);
 
@@ -61,7 +64,7 @@ const gen_anti_code = (code: string, sname: string, uid: string) => {
 
   const sec = md5sum(fm);
   map.set('wsSecret', sec);
-  map.delete('fm');
+  // map.delete('fm');
 
   return [...map.entries()].map((kv) => {
     return kv.join('=');
