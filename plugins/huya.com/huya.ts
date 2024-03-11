@@ -112,7 +112,7 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
 
     const url_flv = `${flv_url}/${sname}.${flv_ext}?${flv_ac}`;
     const url_hls = `${hls_url}/${sname}.${hls_ext}?${hls_ac}`;
-    const idx = 0; // Math.floor(Math.round(Math.random())); default to flv
+    const idx = 1; // Math.floor(Math.round(Math.random())); default to flv
     return [url_flv, url_hls][idx];
   };
   const url = extract_url(stream);
