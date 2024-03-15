@@ -12,8 +12,8 @@ const bili = new Command()
   .version('0.0.1')
   .description('play bilibili video/live')
   .option('--no-login', 'no login')
-  .arguments('<uri:string>')
-  .action(async (opts, uri) => {
+  .arguments('<uri:string> [p:number]')
+  .action(async (opts, uri, p) => {
     try {
       if (opts.login) {
         await ensure_login();
@@ -31,14 +31,16 @@ const bili = new Command()
           u = new URL(`https://www.bilibili.com/video/${uri}`);
         }
 
-        const p: string = u.searchParams.get('p') || '1';
-        let i = parseInt(p);
+        let ep = 1;
+        if (u.searchParams.has('p')) ep = parseInt(u.searchParams.get('p')!);
+        if (Number.isInteger(p)) ep = p!;
+
         while (true) {
-          u.searchParams.set('p', i.toString());
+          u.searchParams.set('p', ep.toString());
           console.log('prepare to open:', u.toString());
           const vi = await get_video_info(u.toString());
           await play_video(vi);
-          i++;
+          ep++;
         }
       }
     } catch (e) {

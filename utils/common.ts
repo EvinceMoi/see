@@ -1,5 +1,6 @@
 import { join } from 'std/path/mod.ts';
 import puppeteer, { Browser, Page } from 'puppeteer';
+import { Mpv } from '@utils/mpv.ts';
 
 export const configDir = (plugin: string) => {
   const home = Deno.env.get('HOME')!;
@@ -38,6 +39,28 @@ export const saveConfigFile = (
   }
 };
 
+export const seq = (start = 0, end: number | undefined = undefined) => {
+  const origin = start;
+  return {
+    *[Symbol.iterator]() {
+      while (true) {
+        const t = this.next();
+        yield t.value;
+        if (t.done)
+          break
+      }
+    },
+    next: () => {
+      start++;
+      if (!Number.isSafeInteger(start)) start = origin;
+      return {
+        value: start,
+        done: end && start >= end
+      }
+    }
+  };
+};
+
 export interface video_info_t {
   title?: string;
   video?: string;
@@ -49,44 +72,16 @@ export interface video_info_t {
   player_options?: string[];
 }
 
+const mpv = new Mpv();
+
 export const play_video = async (vi: video_info_t) => {
-  if (!vi.video) throw new Error('no playable stream');
+  await mpv.play(vi);
+  await mpv.wait_for_finish();
+}
 
-  console.log('playing', vi.video);
-
-  const args: string[] = [];
-  args.push(vi.video);
-  if (vi.audio) args.push(`--audio-file=${vi.audio}`);
-  if (vi.subtitle) args.push(`--sub-file=${vi.subtitle}`);
-  if (vi.title) args.push(`--force-media-title=${vi.title}`);
-  const geometry = vi.geometry ?? '2160x1216';
-  args.push(`--geometry=${geometry}`);
-  const mute = vi.mute ?? 'no';
-  args.push(`--mute=${mute}`);
-  if (vi.referrer) args.push(`--referrer=${vi.referrer}`);
-  if (vi.player_options) args.push(...vi.player_options);
-
-  const command = new Deno.Command('mpv', {
-    args,
-  });
-  const child = command.spawn();
-  await child.status;
-};
-
-export const seq = (start = 0, end: number | undefined = undefined) => {
-  return {
-    *[Symbol.iterator]() {
-      while (true) {
-        yield start++;
-        if (end) {
-          if (start >= end) {
-            break;
-          }
-        }
-      }
-    },
-  };
-};
+export const exit = () => {
+  mpv.quit();
+}
 
 export const set_term_title = (title: string) => {
   const buf = String.fromCharCode(27) + ']0;' + title + String.fromCharCode(7);

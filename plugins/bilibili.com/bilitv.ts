@@ -57,10 +57,8 @@ export const get_video_info = async (url: string): Promise<video_info_t> => {
   if (keys.length === 0) {
     throw new Error('no streams');
   }
-  console.log('streams:', keys);
 
   const key = keys[0];
-  console.log('chosen stream:', key);
   const stream = streams[key];
   const parts = stream.parts;
   // deno-lint-ignore no-explicit-any
