@@ -1,5 +1,5 @@
 import { Command } from 'cliffy/command/mod.ts';
-import { play_video, seq, with_browser, with_page } from '@utils/common.ts';
+import { play_video, seq, with_browser, with_page, enable_player_single_mode } from '@utils/common.ts';
 import { plugin_t } from '@utils/types.ts';
 import { get_playlist, get_video_info } from './ddys.ts';
 
@@ -9,7 +9,7 @@ const ddys = new Command()
   .version('0.0.1')
   .description('play ddys video')
   .arguments('<uri_or_name> [episode:number]')
-  .action(async (_opts, uri_or_name, episode) => {
+  .action(async (opts, uri_or_name, episode) => {
     let uri: string;
     if (uri_or_name.startsWith('http')) {
       uri = uri_or_name;
@@ -18,6 +18,10 @@ const ddys = new Command()
       if (episode != undefined) {
         uri += `?ep=${episode}`;
       }
+    }
+
+    if (opts['singleWindow']) {
+      enable_player_single_mode();
     }
 
     await with_browser(async (browser) => {

@@ -72,7 +72,11 @@ export interface video_info_t {
   player_options?: string[];
 }
 
-const mpv = new Mpv();
+let mpv: Mpv = new Mpv({mode: 'multiple'});
+
+export const enable_player_single_mode = () => {
+  mpv = new Mpv({mode:'single'});
+}
 
 export const play_video = async (vi: video_info_t) => {
   await mpv.play(vi);

@@ -1,6 +1,12 @@
 import { Command } from 'cliffy/command/mod.ts';
 import { get_play_url, get_playlist } from './freeok.ts';
-import { play_video, seq, with_browser, with_page } from '@utils/common.ts';
+import {
+  enable_player_single_mode,
+  play_video,
+  seq,
+  with_browser,
+  with_page,
+} from '@utils/common.ts';
 import { plugin_t } from '@utils/types.ts';
 
 // const DEFAULT_CDN_DOMAIN = 'sf6-cdn-tos.douyinstatic.com';
@@ -19,6 +25,10 @@ const freeok = new Command()
         episode = 1;
       }
       episode -= 1;
+
+      if (opts['singleWindow']) {
+        enable_player_single_mode();
+      }
 
       await with_browser(async (browser) => {
         for (const idx of seq(episode, playlist.length)) {

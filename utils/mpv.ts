@@ -2,12 +2,83 @@ import { seq, video_info_t } from '@utils/common.ts';
 
 const mpv_ipc_socket = '/tmp/mpvsocket-see';
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-const timeout = (ms: number) => new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
-const with_timeout = (ms: number, promise: Promise<any>) => Promise.race([promise, timeout(ms)]);
+
+type MpvMode = 'single' |'multiple';
+interface MpvOptions {
+  mode: MpvMode;
+}
+
+interface Player {
+  play(vi: video_info_t): Promise<void>;
+  wait_for_finish(): Promise<void>;
+  quit(): void;
+}
+
+export class Mpv implements Player {
+  #player: Player;
+
+  constructor(opts?: MpvOptions) {
+    const mode = opts?.mode ?? 'multiple';
+    console.log(`mpv mode: ${mode}`);
+    switch (mode) {
+      case 'single':
+        this.#player = new MpvSingle();
+        break;
+      case 'multiple':
+        this.#player = new MpvMultiple();
+        break;
+      default:
+        throw new Error(`unsupported mpv mode: ${mode}`);
+    }
+  }
+
+  play(vi: video_info_t): Promise<void> {
+    return this.#player.play(vi);
+  }
+  wait_for_finish(): Promise<void> {
+    return this.#player.wait_for_finish();
+  }
+  quit() {
+    return this.#player.quit();
+  }
+}
+
+class MpvMultiple implements Player {
+  #child: Deno.ChildProcess | null = null;
+
+  constructor() { }
+  async play(vi: video_info_t) {
+    console.log(`playing ${vi.video}`);
+    if (!vi.video) throw new Error('no playable stream');
+    const args: string[] = [];
+    args.push(vi.video);
+    if (vi.audio) args.push(`--audio-file=${vi.audio}`);
+    if (vi.subtitle) args.push(`--sub-file=${vi.subtitle}`);
+    if (vi.title) args.push(`--force-media-title=${vi.title}`);
+    const geometry = vi.geometry ?? '2160x1216';
+    args.push(`--geometry=${geometry}`);
+    const mute = vi.mute ?? 'no';
+    args.push(`--mute=${mute}`);
+    if (vi.referrer) args.push(`--referrer=${vi.referrer}`);
+    if (vi.player_options) args.push(...vi.player_options);
+
+    const command = new Deno.Command('mpv', {
+      args,
+    });
+    this.#child = command.spawn();
+  }
+  async wait_for_finish() {
+    await this.#child?.status;
+    this.#child = null;
+  }
+  quit(): void {
+    this.#child?.kill();
+    this.#child = null;
+  }
+}
 
 type MpvCommandArg = string | number;
-
-export class Mpv {
+class MpvSingle implements Player {
   #child: Deno.ChildProcess | null = null;
   #ipc: Deno.UnixConn | null = null;
   #idgen = seq(0);
@@ -29,6 +100,10 @@ export class Mpv {
       await sleep(960);
 
       try {
+        const playlist_count = await this._send_command(['get_property', 'playlist/count']) as number;
+        const playlist_pos = await this._send_command(['get_property', 'playlist-pos']) as number;
+        if (playlist_pos != (playlist_count - 1)) continue;
+
         const remaining = await this._send_command(['get_property', 'playtime-remaining']) as number;
         if (isNaN(remaining) || remaining < 0.1) {
           break;

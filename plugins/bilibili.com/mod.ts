@@ -2,7 +2,7 @@ import { plugin_t } from '@utils/types.ts';
 import { Command } from 'cliffy/command/mod.ts';
 import { ensure_login } from './login.ts';
 import { get_live_info, get_video_info } from './bilitv.ts';
-import { play_video } from '@utils/common.ts';
+import { enable_player_single_mode, play_video } from '@utils/common.ts';
 
 const is_int = (s) => {
   return !isNaN(s) && !isNaN(parseInt(s));
@@ -14,6 +14,7 @@ const bili = new Command()
   .option('--no-login', 'no login')
   .arguments('<uri:string> [p:number]')
   .action(async (opts, uri, p) => {
+    console.log('opts:', opts);
     try {
       if (opts.login) {
         await ensure_login();
@@ -35,6 +36,9 @@ const bili = new Command()
         if (u.searchParams.has('p')) ep = parseInt(u.searchParams.get('p')!);
         if (Number.isInteger(p)) ep = p!;
 
+        if (opts['singleWindow']) {
+          enable_player_single_mode();
+        }
         while (true) {
           u.searchParams.set('p', ep.toString());
           console.log('prepare to open:', u.toString());

@@ -7,7 +7,9 @@ const see = new Command()
   .description('play streams')
   .meta('deno', Deno.version.deno)
   .meta('v8', Deno.version.v8)
-  .meta('typescript', Deno.version.typescript);
+  .meta('typescript', Deno.version.typescript)
+  .globalOption('-s, --single-window', 'enable single-window mode')
+  ;
 see.action(() => {
   see.showHelp();
 });
