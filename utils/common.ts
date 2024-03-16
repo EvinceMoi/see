@@ -51,10 +51,10 @@ export const seq = (start = 0, end: number | undefined = undefined) => {
       }
     },
     next: () => {
-      start++;
+      const it = start++;
       if (!Number.isSafeInteger(start)) start = origin;
       return {
-        value: start,
+        value: it,
         done: end && start >= end
       }
     }
