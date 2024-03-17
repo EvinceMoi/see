@@ -54,9 +54,7 @@ class MpvMultiple implements Player {
     args.push(vi.video);
     if (vi.audio) args.push(`--audio-file=${vi.audio}`);
     if (vi.subtitle) args.push(`--sub-file=${vi.subtitle}`);
-    if (vi.title) args.push(`--force-media-title=${vi.title}`);
-    const geometry = vi.geometry ?? '2160x1216';
-    args.push(`--geometry=${geometry}`);
+    if (vi.title) args.push(`--force-media-title="${vi.title}"`);
     const mute = vi.mute ?? 'no';
     args.push(`--mute=${mute}`);
     if (vi.referrer) args.push(`--referrer=${vi.referrer}`);

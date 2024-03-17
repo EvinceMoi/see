@@ -35,6 +35,7 @@ const ddys = new Command()
         const selected_idx = playlist.findIndex((p) => p.selected);
         for (const idx of seq(selected_idx, playlist.length)) {
           const vi = await get_video_info(page, idx);
+          vi.referrer = `https://${DOMAIN_NAME}/`;
           await play_video(vi);
         }
       });

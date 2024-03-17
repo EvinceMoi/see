@@ -11,6 +11,7 @@ const huya = new Command()
     try {
       const vi = await get_play_url(rid);
       if (vi.title) set_term_title(vi.title);
+      vi.referrer = 'https://www.huya.com/';
       await play_video(vi);
     } catch (e) {
       console.log(e.message);
