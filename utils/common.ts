@@ -80,9 +80,7 @@ export const enable_player_single_mode = () => {
 };
 
 export const play_video = async (vi: video_info_t) => {
-  console.log('play_video', vi);
   await mpv.play(vi);
-  console.log('wait_for_finish');
   await mpv.wait_for_finish();
 };
 
