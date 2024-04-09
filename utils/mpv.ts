@@ -1,4 +1,4 @@
-import { seq, video_info_t } from '@utils/common.ts';
+import { seq, video_info_t, app_terminated } from '@utils/common.ts';
 
 const mpv_ipc_socket = '/tmp/mpvsocket-see';
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -94,8 +94,8 @@ class MpvSingle implements Player {
   }
 
   async wait_for_finish() {
-    while (true) {
-      await sleep(960);
+    while (!app_terminated) {
+      await sleep(360);
 
       try {
         const playlist_count = await this._send_command(['get_property', 'playlist/count']) as number;

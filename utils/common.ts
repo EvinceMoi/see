@@ -46,8 +46,9 @@ export const seq = (start = 0, end: number | undefined = undefined) => {
       while (true) {
         const t = this.next();
         yield t.value;
-        if (t.done)
-          break
+        if (t.done) {
+          break;
+        }
       }
     },
     next: () => {
@@ -55,9 +56,9 @@ export const seq = (start = 0, end: number | undefined = undefined) => {
       if (!Number.isSafeInteger(start)) start = origin;
       return {
         value: it,
-        done: end && start >= end
-      }
-    }
+        done: end && start >= end,
+      };
+    },
   };
 };
 
@@ -72,20 +73,18 @@ export interface video_info_t {
   player_options?: string[];
 }
 
-let mpv: Mpv = new Mpv({mode: 'multiple'});
+let mpv: Mpv = new Mpv({ mode: 'multiple' });
 
 export const enable_player_single_mode = () => {
-  mpv = new Mpv({mode:'single'});
-}
+  mpv = new Mpv({ mode: 'single' });
+};
 
 export const play_video = async (vi: video_info_t) => {
+  console.log('play_video', vi);
   await mpv.play(vi);
+  console.log('wait_for_finish');
   await mpv.wait_for_finish();
-}
-
-export const exit = () => {
-  mpv.quit();
-}
+};
 
 export const set_term_title = (title: string) => {
   const buf = String.fromCharCode(27) + ']0;' + title + String.fromCharCode(7);
@@ -94,7 +93,6 @@ export const set_term_title = (title: string) => {
 
 export const PC_USER_AGENT = {
   'User-Agent':
-    // 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36',
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
 };
 export const MOBILE_USER_AGENT = {
@@ -103,20 +101,30 @@ export const MOBILE_USER_AGENT = {
 };
 
 export const with_browser = async (cb: (browser: Browser) => Promise<void>) => {
-  const browser = await puppeteer.launch({
-    defaultViewport: {
-      width: 1920,
-      height: 1080,
-    },
-    headless: true,
-    // args: ['--headless=new'],
-    // args: ['--headless=true'],
-  });
-
+  let browser: Browser | undefined;
   try {
+    browser = await puppeteer.launch({
+      // const browser: Browser = await puppeteer.launch({
+      defaultViewport: {
+        width: 800,
+        height: 600,
+      },
+      headless: true,
+      handleSIGINT: true,
+      handleSIGTERM: true,
+      args: [
+        '--disable-crash-reporter',
+        '--single-process',
+      ],
+    });
     await cb(browser);
   } finally {
-    await browser.close();
+    browser?.disconnect().catch(() => {});
+    const process = browser?.process();
+    if (process) {
+      process.kill('SIGINT');
+      Deno.kill(process.pid!);
+    }
   }
 };
 export const with_page = async <T>(
@@ -125,14 +133,30 @@ export const with_page = async <T>(
 ) => {
   const page = await browser.newPage();
   await page.setUserAgent(PC_USER_AGENT['User-Agent']);
-  await page.setViewport({ width: 1920, height: 1080 });
+  await page.setViewport({ width: 800, height: 600 });
 
   let ret: T;
   try {
     ret = await cb(page);
   } finally {
-    await page.close();
+    page.close({ runBeforeUnload: true }).catch(() => { });
   }
 
   return ret;
+};
+
+export let app_terminated = false;
+const sig_listener = () => {
+  app_terminated = true;
+};
+['SIGINT', 'SIGTERM'].forEach((signal) => {
+  Deno.addSignalListener(signal as Deno.Signal, sig_listener);
+});
+
+export const exit = () => {
+  app_terminated = true;
+  ['SIGINT', 'SIGTERM'].forEach((signal) => {
+    Deno.removeSignalListener(signal as Deno.Signal, sig_listener);
+  });
+  mpv.quit();
 };

@@ -1,5 +1,12 @@
 import { Command } from 'cliffy/command/mod.ts';
-import { play_video, seq, with_browser, with_page, enable_player_single_mode } from '@utils/common.ts';
+import {
+  enable_player_single_mode,
+  play_video,
+  seq,
+  with_browser,
+  with_page,
+  exit,
+} from '@utils/common.ts';
 import { plugin_t } from '@utils/types.ts';
 import { get_playlist, get_video_info } from './ddys.ts';
 
@@ -26,20 +33,28 @@ const ddys = new Command()
 
     await with_browser(async (browser) => {
       await with_page(browser, async (page) => {
-        console.log('open uri:', uri);
-        await page.goto(uri);
+        try {
+          console.log('open uri:', uri);
+          await page.goto(uri);
 
-        const playlist = await get_playlist(page);
-        console.log('playlist:', playlist.map((p) => p.caption));
+          const playlist = await get_playlist(page);
+          console.log('playlist:', playlist.map((p) => p.caption));
 
-        const selected_idx = playlist.findIndex((p) => p.selected);
-        for (const idx of seq(selected_idx, playlist.length)) {
-          const vi = await get_video_info(page, idx);
-          vi.referrer = `https://${DOMAIN_NAME}/`;
-          await play_video(vi);
+          const selected_idx = playlist.findIndex((p) => p.selected);
+          for (const idx of seq(selected_idx, playlist.length)) {
+            const vi = await get_video_info(page, idx);
+            vi.referrer = `https://${DOMAIN_NAME}/`;
+            vi.player_options=[
+              `--http-header-fields='authority: v.${DOMAIN_NAME}','accept: */*','accept-language: en-US,en;q=0.5','origin: https://${DOMAIN_NAME}','range: bytes=0-','referer: https://${DOMAIN_NAME}/','sec-ch-ua: "Chromium";v="122","Not(A:Brand";v="24","Brave";v="122"','sec-ch-ua-mobile: ?0','sec-ch-ua-platform: "Linux"','sec-fetch-dest: video','sec-fetch-mode: cors','sec-fetch-site: same-site','sec-gpc: 1','user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/122.0.0.0 Safari/537.36'`
+            ];
+            await play_video(vi);
+          }
+        } catch (e) {
+          console.log('Error:', e.message);
         }
       });
     });
+    // exit();
   });
 
 const plugin: plugin_t = {
