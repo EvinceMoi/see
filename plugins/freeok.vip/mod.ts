@@ -4,8 +4,7 @@ import {
   enable_player_single_mode,
   play_video,
   seq,
-  with_browser,
-  with_page,
+  app_terminated
 } from '@utils/common.ts';
 import { plugin_t } from '@utils/types.ts';
 
@@ -30,15 +29,12 @@ const freeok = new Command()
         enable_player_single_mode();
       }
 
-      await with_browser(async (browser) => {
-        for (const idx of seq(episode, playlist.length)) {
-          const ep = playlist.at(idx)!;
-          const vi = await with_page(browser, async (page) => {
-            return await get_play_url(page, ep);
-          });
-          await play_video(vi);
-        }
-      });
+      for (const idx of seq(episode, playlist.length)) {
+        if (app_terminated) break;
+        const ep = playlist[idx];
+        const vi = await get_play_url(ep);
+        await play_video(vi);
+      }
     } catch (e) {
       console.log(e.message);
     }

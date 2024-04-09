@@ -1,5 +1,5 @@
 import { join } from 'std/path/mod.ts';
-import puppeteer, { Browser, Page } from 'puppeteer';
+// import puppeteer, { Browser, Page } from 'puppeteer';
 import { Mpv } from '@utils/mpv.ts';
 
 export const configDir = (plugin: string) => {
@@ -98,50 +98,50 @@ export const MOBILE_USER_AGENT = {
     'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Mobile Safari/537.36',
 };
 
-export const with_browser = async (cb: (browser: Browser) => Promise<void>) => {
-  let browser: Browser | undefined;
-  try {
-    browser = await puppeteer.launch({
-      // const browser: Browser = await puppeteer.launch({
-      defaultViewport: {
-        width: 800,
-        height: 600,
-      },
-      headless: true,
-      handleSIGINT: true,
-      handleSIGTERM: true,
-      args: [
-        '--disable-crash-reporter',
-        '--single-process',
-      ],
-    });
-    await cb(browser);
-  } finally {
-    browser?.disconnect().catch(() => {});
-    const process = browser?.process();
-    if (process) {
-      process.kill('SIGINT');
-      Deno.kill(process.pid!);
-    }
-  }
-};
-export const with_page = async <T>(
-  browser: Browser,
-  cb: (page: Page) => Promise<T>,
-) => {
-  const page = await browser.newPage();
-  await page.setUserAgent(PC_USER_AGENT['User-Agent']);
-  await page.setViewport({ width: 800, height: 600 });
+// export const with_browser = async (cb: (browser: Browser) => Promise<void>) => {
+//   let browser: Browser | undefined;
+//   try {
+//     browser = await puppeteer.launch({
+//       // const browser: Browser = await puppeteer.launch({
+//       defaultViewport: {
+//         width: 800,
+//         height: 600,
+//       },
+//       headless: true,
+//       handleSIGINT: true,
+//       handleSIGTERM: true,
+//       args: [
+//         '--disable-crash-reporter',
+//         '--single-process',
+//       ],
+//     });
+//     await cb(browser);
+//   } finally {
+//     browser?.disconnect().catch(() => {});
+//     const process = browser?.process();
+//     if (process) {
+//       process.kill('SIGINT');
+//       Deno.kill(process.pid!);
+//     }
+//   }
+// };
+// export const with_page = async <T>(
+//   browser: Browser,
+//   cb: (page: Page) => Promise<T>,
+// ) => {
+//   const page = await browser.newPage();
+//   await page.setUserAgent(PC_USER_AGENT['User-Agent']);
+//   await page.setViewport({ width: 800, height: 600 });
 
-  let ret: T;
-  try {
-    ret = await cb(page);
-  } finally {
-    page.close({ runBeforeUnload: true }).catch(() => { });
-  }
+//   let ret: T;
+//   try {
+//     ret = await cb(page);
+//   } finally {
+//     page.close({ runBeforeUnload: true }).catch(() => { });
+//   }
 
-  return ret;
-};
+//   return ret;
+// };
 
 export let app_terminated = false;
 const sig_listener = () => {
