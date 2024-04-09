@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
-import puppeteer, { ElementHandle, Page } from 'puppeteer';
-import { video_info_t } from '@utils/common.ts';
+// import puppeteer, { ElementHandle, Page } from 'puppeteer';
+import { cheerio } from 'cheerio';
+import { PC_USER_AGENT, video_info_t } from '@utils/common.ts';
 
 const selectors = {
   playlist_contianer: '.wp-playlist-tracks',
@@ -9,75 +10,66 @@ const selectors = {
 
   video_play_button: '.vjs-big-play-button',
   video: '#vjsp_html5_api',
+  source_script: 'script.wp-playlist-script',
+};
+
+const fetch_html = async (url: string): Promise<string> => {
+  const resp = await fetch(url, {
+    headers: {
+      ...PC_USER_AGENT,
+    },
+  });
+  return resp.text();
 };
 
 interface playlist_item_t {
   caption: string;
-  selected: boolean;
-  el?: ElementHandle<any>;
+  src0: string;
+  src1: string;
+  src2: string;
+  src3: string;
 }
-export const get_playlist = async (
-  page: Page,
-) => {
-  await page.waitForSelector(selectors.playlist_contianer); // wait for playlist
-  const playlist_items = await page.$$(selectors.playlist_item);
-  const playlist = await Promise.all(playlist_items.map(async (it) => {
-    const div_class: string = await it.evaluate((el) =>
-      el.getAttribute('class') || ''
-    );
-    const selected = div_class.includes(selectors.playlist_playing);
 
-    let text: string = await it.evaluate((el) => el.textContent || '');
-    text = text.replace(/[\n\t]+/g, '');
-    const ret: playlist_item_t = {
-      caption: text,
-      selected,
-      el: it,
+export const get_playlist = async (uri: string): Promise<playlist_item_t[]> => {
+  const html = await fetch_html(uri);
+  const $ = cheerio.load(html);
+  const sjson = $(selectors.source_script).text();
+  const source = JSON.parse(sjson);
+  const tracks = source.tracks.map(track => {
+    const { caption, src0, src1, src2, src3 } = track;
+    return {
+      caption, src0, src1, src2, src3
     };
-    return ret;
-  }));
+  });
+  return tracks;
+}
 
-  return playlist;
-};
+export const get_video_info = async (ep: playlist_item_t, domain: string): Promise<video_info_t> => {
+  const title = ep.caption;
+  let src: string | undefined = undefined;
 
-export const get_video_info = async (
-  page: Page,
-  playlist_idx: number,
-): Promise<video_info_t> => {
-  const playlist = await get_playlist(page);
-  if (playlist_idx >= playlist.length) {
-    throw new Error(`no such index: ${playlist_idx}`);
+  if (ep.src0) {
+    src = `https://v.${domain}${ep.src0}`;
+  } else if (ep.src1) {
+    const resp = await fetch(`https://${domain}/getvddr3/video?` + new URLSearchParams({
+      id: ep.src1,
+      type: 'json'
+    }), {
+      headers: {
+        ...PC_USER_AGENT,
+      }
+    });
+    const res = await resp.json();
+    src = res.url;
+  } else if (ep.src2) {
+    console.log('==== src2:', ep.src2);
+  } else if (ep.src3) {
+    console.log('==== src3:', ep.src3);
   }
 
-  const episode = playlist[playlist_idx];
-  await episode.el!.click();
-
-  // await el.click();
-
-  // click play button
-  const pp_selector = '.vjs-icon-placeholder';
-  await page.waitForSelector(pp_selector);
-
-  const el_play = await page.waitForSelector(selectors.video_play_button);
-  if (!el_play) throw new Error('no play button found');
-  await el_play.click();
-
-  // wait for <video> has src attribute
-  const el_video = await page.waitForSelector(selectors.video);
-  if (!el_video) throw new Error('video tag not found');
-  const vp = selectors.video;
-  await page.waitForFunction((vp) => {
-    const el = document.querySelector(vp);
-    const src = el?.getAttribute('src');
-    return !!src;
-  }, {
-    timeout: 60 * 1000,
-  }, vp);
-  const src = await el_video.evaluate((el) => el.getAttribute('src') || '');
-  console.log('episode', episode.caption, 'play url:', src);
-  await el_video.click(); // pause video
   return {
-    title: episode.caption,
-    video: src,
-  };
-};
+    title,
+    video: src
+  }
+}
+
