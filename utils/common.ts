@@ -70,6 +70,7 @@ export interface video_info_t {
   geometry?: string;
   mute?: boolean;
   referrer?: string;
+  http_headers?: string[]; // ['usage-agent': '', ...];
   player_options?: string[];
 }
 

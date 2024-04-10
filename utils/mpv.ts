@@ -1,9 +1,9 @@
-import { seq, video_info_t, app_terminated } from '@utils/common.ts';
+import { app_terminated, seq, video_info_t } from '@utils/common.ts';
 
 const mpv_ipc_socket = '/tmp/mpvsocket-see';
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-type MpvMode = 'single' |'multiple';
+type MpvMode = 'single' | 'multiple';
 interface MpvOptions {
   mode: MpvMode;
 }
@@ -19,7 +19,6 @@ export class Mpv implements Player {
 
   constructor(opts?: MpvOptions) {
     const mode = opts?.mode ?? 'multiple';
-    console.log(`mpv mode: ${mode}`);
     switch (mode) {
       case 'single':
         this.#player = new MpvSingle();
@@ -46,7 +45,7 @@ export class Mpv implements Player {
 class MpvMultiple implements Player {
   #child: Deno.ChildProcess | null = null;
 
-  constructor() { }
+  constructor() {}
   async play(vi: video_info_t) {
     console.log(`playing ${vi.video}`);
     if (!vi.video) throw new Error('no playable stream');
@@ -59,6 +58,13 @@ class MpvMultiple implements Player {
     args.push(`--mute=${mute}`);
     if (vi.referrer) args.push(`--referrer=${vi.referrer}`);
     if (vi.player_options) args.push(...vi.player_options);
+    if (vi.http_headers) {
+      args.push(
+        `--http-header-fields=${
+          vi.http_headers.map((it) => `'${it}'`).join(',')
+        }`,
+      );
+    }
 
     const command = new Deno.Command('mpv', {
       args,
@@ -98,17 +104,26 @@ class MpvSingle implements Player {
       await sleep(360);
 
       try {
-        const playlist_count = await this._send_command(['get_property', 'playlist/count']) as number;
-        const playlist_pos = await this._send_command(['get_property', 'playlist-pos']) as number;
+        const playlist_count = await this._send_command([
+          'get_property',
+          'playlist/count',
+        ]) as number;
+        const playlist_pos = await this._send_command([
+          'get_property',
+          'playlist-pos',
+        ]) as number;
         if (playlist_pos != (playlist_count - 1)) continue;
 
-        const remaining = await this._send_command(['get_property', 'playtime-remaining']) as number;
+        const remaining = await this._send_command([
+          'get_property',
+          'playtime-remaining',
+        ]) as number;
         if (isNaN(remaining) || remaining < 0.1) {
           break;
         }
       } catch (_) {
         // mpv not running
-        break; 
+        break;
       }
     }
   }
@@ -130,7 +145,7 @@ class MpvSingle implements Player {
     });
     this.#child = command.spawn();
     this.#child.unref(); // don't wait for child to exit
-    this.#child.status.then(_ => {
+    this.#child.status.then((_) => {
       this._cleanup();
     });
 
@@ -141,7 +156,7 @@ class MpvSingle implements Player {
     this.#ipc = await Deno.connect(
       { path: mpv_ipc_socket, transport: 'unix' },
     );
-  } 
+  }
 
   async _do_read() {
     // check if mpv is still running
@@ -167,7 +182,7 @@ class MpvSingle implements Player {
         }).catch((e) => {
           controller.error(e);
         });
-      }
+      },
     });
 
     const lines = stream.getReader();
@@ -202,7 +217,18 @@ class MpvSingle implements Player {
     const mute = vi.mute ?? 'no';
     fileoptions.push(`mute=${mute}`);
     if (vi.referrer) fileoptions.push(`referrer=${vi.referrer}`);
-    if (vi.player_options) fileoptions = fileoptions.concat(vi.player_options);
+    if (vi.player_options) {
+      fileoptions = fileoptions.concat(
+        vi.player_options.map((opt) => opt.replaceAll(/^-+/g, '')),
+      );
+    }
+    if (vi.http_headers) {
+      fileoptions = fileoptions.concat(
+        vi.http_headers.map((opt) => {
+          return `http-header-fields-append=%${opt.length}%${opt}`;
+        }),
+      );
+    }
     const fo = fileoptions.join(',');
 
     const command = ['loadfile', vi.video!, 'append-play'];
@@ -214,7 +240,10 @@ class MpvSingle implements Player {
   _gen_id() {
     return this.#idgen.next().value;
   }
-  async _send_command(command: MpvCommandArg[], is_async: boolean | undefined = true) {
+  async _send_command(
+    command: MpvCommandArg[],
+    is_async: boolean | undefined = true,
+  ) {
     if (this.#ipc === null) return;
 
     const cmd_id = this._gen_id();
@@ -231,14 +260,16 @@ class MpvSingle implements Player {
     try {
       await this.#ipc?.write(new TextEncoder().encode(to_send));
       return Promise.race([
-        new Promise(resolve => { 
+        new Promise((resolve) => {
           this.#requests.set(cmd_id, resolve);
           this._do_read();
         }),
-        new Promise((_, reject) => setTimeout(() => { 
-          this.#requests.delete(cmd_id);
-          reject(new Error('timeout'));
-        }, 200)),
+        new Promise((_, reject) =>
+          setTimeout(() => {
+            this.#requests.delete(cmd_id);
+            reject(new Error('timeout'));
+          }, 200)
+        ),
       ]);
     } catch (err) {
       // ipc closed

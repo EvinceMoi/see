@@ -33,9 +33,22 @@ const ddys = new Command()
         if (app_terminated) break;
         const vi = await get_video_info(playlist[idx], DOMAIN_NAME);
         vi.referrer = `https://${DOMAIN_NAME}/`;
-        vi.player_options = [
-          `--http-header-fields='authority: v.${DOMAIN_NAME}','accept: */*','accept-language: en-US,en;q=0.5','origin: https://${DOMAIN_NAME}','range: bytes=0-','referer: https://${DOMAIN_NAME}/','sec-ch-ua: "Chromium";v="122","Not(A:Brand";v="24","Brave";v="122"','sec-ch-ua-mobile: ?0','sec-ch-ua-platform: "Linux"','sec-fetch-dest: video','sec-fetch-mode: cors','sec-fetch-site: same-site','sec-gpc: 1','user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/122.0.0.0 Safari/537.36'`,
-        ];
+        vi.http_headers = [
+          `authority: v.${DOMAIN_NAME}`,
+          `accept: */*`,
+          `accept-language: en-US,en;q=0.5`,
+          `origin: https://${DOMAIN_NAME}`,
+          `range: bytes=0-`,
+          `referer: https://${DOMAIN_NAME}/`,
+          `sec-ch-ua: "Chromium";v="122","Not(A:Brand";v="24","Brave";v="122"`,
+          `sec-ch-ua-mobile: ?0`,
+          `sec-ch-ua-platform: "Linux"`,
+          `sec-fetch-dest: video`,
+          `sec-fetch-mode: cors`,
+          `sec-fetch-site: same-site`,
+          `sec-gpc: 1`,
+          `user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/122.0.0.0 Safari/537.36`
+        ]
         await play_video(vi);
       }
     } catch (e) {
