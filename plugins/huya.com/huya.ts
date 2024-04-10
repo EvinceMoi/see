@@ -22,22 +22,22 @@ const get_mobile_page = async (rid: string): Promise<string> => {
 
 // deno-lint-ignore require-await
 const get_uid = async (): Promise<string> => {
-  return '0';
-  // const resp = await fetch(`https://udblgn.huya.com/web/anonymousLogin`, {
-  //   method: 'POST',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  //   body: JSON.stringify({
-  //     appId: 5002,
-  //     byPass: 4,
-  //     context: '',
-  //     version: '2.4',
-  //     data: {},
-  //   }),
-  // });
-  // const json = await resp.json();
-  // return json['data']['uid'];
+  // return '0';
+  const resp = await fetch(`https://udblgn.huya.com/web/anonymousLogin`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      appId: 5002,
+      byPass: 3,
+      context: '',
+      version: '2.4',
+      data: {},
+    }),
+  });
+  const json = await resp.json();
+  return json['data']['uid'];
 };
 
 const gen_anti_code = (code: string, sname: string, uid: string) => {
@@ -51,8 +51,8 @@ const gen_anti_code = (code: string, sname: string, uid: string) => {
   map.set('seqid', Date.now().toString());
   map.set('uid', uid);
   map.set('uuid', '0');
-  map.set('ctype', 'huya_live');
-  map.set('t', '100');
+  map.set('ctype', 'tars_mp');
+  map.set('t', '102');
 
   const md5 = md5sum(`${map.get('seqid')}|${map.get('ctype')}|${map.get('t')}`);
 
@@ -64,7 +64,7 @@ const gen_anti_code = (code: string, sname: string, uid: string) => {
 
   const sec = md5sum(fm);
   map.set('wsSecret', sec);
-  // map.delete('fm');
+  map.delete('fm');
 
   return [...map.entries()].map((kv) => {
     return kv.join('=');
@@ -112,7 +112,7 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
 
     const url_flv = `${flv_url}/${sname}.${flv_ext}?${flv_ac}`;
     const url_hls = `${hls_url}/${sname}.${hls_ext}?${hls_ac}`;
-    const idx = 1; // Math.floor(Math.round(Math.random())); default to flv
+    const idx = 0; // Math.floor(Math.round(Math.random())); default to flv
     return [url_flv, url_hls][idx];
   };
   const url = extract_url(stream);
