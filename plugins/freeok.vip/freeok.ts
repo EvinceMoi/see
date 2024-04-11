@@ -6,8 +6,8 @@ const BASE_URL = 'www.freeok.pro';
 const get_headers = (referer: string) => {
   return {
     'authority': BASE_URL,
-    'accept':
-      'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+    // 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+    'accept': '*/*',
     'accept-language': 'en-US,en;q=0.7',
     'cache-control': 'max-age=0',
     'referer': referer,
@@ -61,21 +61,52 @@ export const get_playlist = async (id: string): Promise<playlist_item_t[]> => {
   return pl;
 };
 
+const get_okyun = async (url: string, referer: string): Promise<string | undefined> => {
+  // const html = await fetch_html(url, get_headers(referer));
+  // const $ = cheerio.load(html);
+  // const charset_id = $('meta[charset="UTF-8"]').attr('id')?.replace('now_', '');
+  // console.log('charset id:', charset_id);
+  // const viewport_id = $('meta[name="viewport"]').attr('id')?.replace('now_', '');
+  // console.log('viewport id:', viewport_id);
+  // const config_script = $('script[type="text/javascript"]').map((_, el) => $(el).text()).get().join(';;;');
+  // const matches = config_script.match(/var\s+config\s+=\s+({[\s\S]+})/);
+  // if (matches) {
+  //   const config  = eval(`(function() { return ${matches[1]} })()`);
+  //   console.log('config:', JSON.stringify(config));
+  // }
+  // let crypto_url = $('script').map((_, el) => $(el).attr('src')).get().filter(u => u.includes('crypto'))[0];
+  // if (crypto_url.startsWith('//')) {
+  //   crypto_url = 'https:' + crypto_url;
+  // }
+  // const crypto = await fetch_html(crypto_url, get_headers(referer));
+  // console.log('crypto:', crypto);
+  return undefined;
+}
+
 export const get_play_url = async (ep: playlist_item_t): Promise<video_info_t> => {
   const html = await fetch_html(ep.url, get_headers(ep.referer));
   const $ = cheerio.load(html);
+  const title = $('title').text().split('-')[0].trim();
   const script = $('div.player-box-main > script:first').text().trim();
   const matches = script.match(/var player.+=\s*(.+)/);
-  console.log('matched:', matches);
   let vu: string | undefined = undefined;
   if (matches) {
     const d = JSON.parse(matches[1]);
-    console.log(JSON.stringify(d));
-    vu = decodeURIComponent(d.url);
+    const from = d.from.toLowerCase();
+    const url = decodeURIComponent(d.url);
+    if (from == 'okyun') {
+      const purl = `https://${BASE_URL}/okplayer/?url=${url}&next=https://${BASE_URL}/${d.link_next}&title=${title}`;
+      vu = await get_okyun(purl, ep.url);
+    } else if (from.endsWith('m3u8')) {
+      vu = decodeURIComponent(d.url);
+    } else {
+      console.log('unknown source:', from);
+    }
+    
   }
 
   return {
-    title: ep.title,
+    title: title,
     video: vu,
   }
 };

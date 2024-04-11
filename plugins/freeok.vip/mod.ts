@@ -18,8 +18,7 @@ const freeok = new Command()
   .action(async (opts, id, episode) => {
     try {
       // const cdn = opts.cdn ? DEFAULT_CDN_DOMAIN : null;
-      const playlist = await get_playlist(id);
-      episode = episode || 1;
+      const playlist = await get_playlist(id);       episode = episode || 1;
       if (episode > playlist.length || episode < 0) {
         episode = 1;
       }
