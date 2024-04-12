@@ -32,6 +32,9 @@ export class Mpv implements Player {
   }
 
   play(vi: video_info_t): Promise<void> {
+    console.log('vo:', vi.video);
+    if (vi.audio)
+      console.log('ao:', vi.audio);
     return this.#player.play(vi);
   }
   wait_for_finish(): Promise<void> {
