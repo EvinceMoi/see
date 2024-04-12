@@ -50,7 +50,6 @@ class MpvMultiple implements Player {
 
   constructor() {}
   async play(vi: video_info_t) {
-    console.log(`playing ${vi.video}`);
     if (!vi.video) throw new Error('no playable stream');
     const args: string[] = [];
     args.push(vi.video);
@@ -163,7 +162,6 @@ class MpvSingle implements Player {
 
   async _do_read() {
     // check if mpv is still running
-    // await this._start_mpv();
     if (this.#ipc === null) return;
 
     // do read
@@ -278,7 +276,6 @@ class MpvSingle implements Player {
       // ipc closed
       this._cleanup();
       throw err;
-      // console.error('mpv ipc error:', err);
     }
   }
 
