@@ -1,5 +1,5 @@
-import { walk } from 'std/fs/mod.ts';
-import { join, toFileUrl } from 'std/path/mod.ts';
+import { walk } from '@std/fs';
+import { join, toFileUrl } from '@std/path';
 import { colors } from 'cliffy/ansi/colors.ts';
 import { Command } from 'cliffy/command/mod.ts';
 

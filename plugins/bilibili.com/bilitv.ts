@@ -1,8 +1,8 @@
-import { typeByExtension } from 'std/media_types/type_by_extension.ts';
-import { ensureDirSync } from 'std/fs/mod.ts';
-import { basename, join } from 'std/path/mod.ts';
-import { maxBy } from 'std/collections/max_by.ts';
-import { configDir, PC_USER_AGENT, video_info_t } from '@utils/common.ts';
+import { typeByExtension } from '@std/media-types';
+import { ensureDirSync } from '@std/fs';
+import { basename, join } from '@std/path';
+import { maxBy } from '@std/collections';
+import { configDir, PC_USER_AGENT, video_info_t, abortable_fetch } from '@utils/common.ts';
 
 const BASE_URL = 'https://www.bilibili.com';
 const plug_name = 'bilitv';
@@ -108,7 +108,7 @@ export const get_live_info = async (rid: number): Promise<video_info_t> => {
     'Cookie': cookies,
   };
 
-  const room_info_res = await fetch(
+  const room_info_res = await abortable_fetch(
     `https://api.live.bilibili.com/room/v1/Room/room_init?id=${rid}`,
     {
       headers: {
@@ -152,7 +152,7 @@ export const get_live_info = async (rid: number): Promise<video_info_t> => {
     platform: 'h5',
     ptype: '8',
   });
-  const res = await fetch(play_info_url + '?' + params, {
+  const res = await abortable_fetch(play_info_url + '?' + params, {
     headers: {
       ...PC_USER_AGENT,
       ...cookie_header,

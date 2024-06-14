@@ -1,15 +1,19 @@
 import { encode, Hash } from 'checksum';
-import moment from 'moment';
-import { MOBILE_USER_AGENT, video_info_t } from '@utils/common.ts';
-import { decodeBase64 } from 'std/encoding/base64.ts';
-import { maxBy } from 'std/collections/max_by.ts';
+import dayjs from 'dayjs';
+import {
+  abortable_fetch,
+  MOBILE_USER_AGENT,
+  video_info_t,
+} from '@utils/common.ts';
+import { decodeBase64 } from '@std/encoding';
+import { maxBy } from '@std/collections';
 
 const md5sum = (data: string) => {
   return new Hash('md5').digest(encode(data)).hex();
 };
 
 const fetch_html = async (url: string): Promise<string> => {
-  const resp = await fetch(url, {
+  const resp = await abortable_fetch(url, {
     headers: {
       ...MOBILE_USER_AGENT,
     },
@@ -23,19 +27,22 @@ const get_mobile_page = async (rid: string): Promise<string> => {
 // deno-lint-ignore require-await
 const get_uid = async (): Promise<string> => {
   // return '0';
-  const resp = await fetch(`https://udblgn.huya.com/web/anonymousLogin`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
+  const resp = await abortable_fetch(
+    `https://udblgn.huya.com/web/anonymousLogin`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        appId: 5002,
+        byPass: 3,
+        context: '',
+        version: '2.4',
+        data: {},
+      }),
     },
-    body: JSON.stringify({
-      appId: 5002,
-      byPass: 3,
-      context: '',
-      version: '2.4',
-      data: {},
-    }),
-  });
+  );
   const json = await resp.json();
   return json['data']['uid'];
 };
@@ -91,7 +98,7 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
   const rnick = room_info['tLiveInfo']['sNick'];
   const rgame = room_info['tLiveInfo']['sGameFullName'];
   const rdesc = room_info['tLiveInfo']['sIntroduction'];
-  const start_time = moment(room_info['tLiveInfo']['iStartTime'] * 1000).format(
+  const start_time = dayjs.unix(room_info['tLiveInfo']['iStartTime']).format(
     'YYYY-MM-DD HH:mm:ss',
   );
 

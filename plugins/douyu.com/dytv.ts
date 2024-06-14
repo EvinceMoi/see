@@ -1,7 +1,7 @@
 import { encode, Hash } from 'checksum';
 import { DOMParser } from 'deno_dom';
-import moment from 'moment';
-import { PC_USER_AGENT, video_info_t } from '@utils/common.ts';
+import dayjs from 'dayjs';
+import { abortable_fetch, PC_USER_AGENT, video_info_t } from '@utils/common.ts';
 
 const md5sum = (data: string) => {
   return new Hash('md5').digest(encode(data)).hex();
@@ -21,7 +21,7 @@ interface room_info_t {
 }
 
 const fetch_html = async (url: string): Promise<string> => {
-  const resp = await fetch(url, {
+  const resp = await abortable_fetch(url, {
     headers: {
       ...PC_USER_AGENT,
     },
@@ -66,7 +66,7 @@ const get_stream_key_from_preview = async (
     auth,
   };
 
-  const resp = await fetch(url, {
+  const resp = await abortable_fetch(url, {
     method: 'POST',
     headers: {
       ...PC_USER_AGENT,
@@ -137,7 +137,7 @@ const get_stream_from_pc_page = async (
   const rate = `-1`;
   const params = `${sign}&cdn=${cdn}&rate=${rate}`;
   const api_url = `https://www.douyu.com/lapi/live/getH5Play/${rid}`;
-  const resp = await fetch(api_url, {
+  const resp = await abortable_fetch(api_url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -207,13 +207,16 @@ const get_stream_from_mobile_page = async (
 
   const sign = eval(`${func_sign} sign('${rid}', '${DID}', '${ns}')`);
   const params = `${sign}&ver=219032101&rid=${rid}&rate=-1`;
-  const resp = await fetch('https://m.douyu.com/api/room/ratestream', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+  const resp = await abortable_fetch(
+    'https://m.douyu.com/api/room/ratestream',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      },
+      body: params,
     },
-    body: params,
-  });
+  );
   const res = await resp.json();
   if (res.code !== 0) {
     return {
@@ -254,9 +257,7 @@ export const get_play_url = async (
   cdn_host: string | null = null,
 ): Promise<video_info_t> => {
   const title = (room: room_info_t) => {
-    const open_time = moment(room.showTime * 1000).format(
-      'YYYY-MM-DD HH:mm:ss',
-    );
+    const open_time = dayjs.unix(room.showTime).format('YYYY-MM-DD HH:mm:ss');
     return `斗鱼 - ${room.rid}|${room.nickname}|${room.cate2Name} - [${open_time}]`;
   };
 

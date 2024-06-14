@@ -1,4 +1,4 @@
-import { join } from 'std/path/mod.ts';
+import { join } from '@std/path/join';
 // import puppeteer, { Browser, Page } from 'puppeteer';
 import { Mpv } from '@utils/mpv.ts';
 
@@ -144,8 +144,11 @@ export const MOBILE_USER_AGENT = {
 //   return ret;
 // };
 
+const abort = new AbortController();
+
 export let app_terminated = false;
 const sig_listener = () => {
+  abort.abort();
   app_terminated = true;
 };
 ['SIGINT', 'SIGTERM'].forEach((signal) => {
@@ -158,4 +161,16 @@ export const exit = () => {
     Deno.removeSignalListener(signal as Deno.Signal, sig_listener);
   });
   mpv.quit();
+};
+
+export const abortable_fetch = (url: string | URL | Request, init: RequestInit | undefined): Promise<Response> => {
+  if (!init) {
+    init = {};
+  }
+  if (!init.signal) {
+    init.signal = abort.signal;
+  }
+  return fetch(url, {
+    ...init,
+  });
 };

@@ -1,4 +1,4 @@
-import { video_info_t } from '@utils/common.ts';
+import { video_info_t, abortable_fetch } from '@utils/common.ts';
 import { cheerio } from 'cheerio';
 
 const BASE_URL = 'www.freeok.pro';
@@ -26,7 +26,7 @@ const get_headers = (referer: string) => {
 };
 
 const fetch_html = async (url: string, headers: {[key: string]: string}): Promise<string> => {
-  const resp = await fetch(url, {
+  const resp = await abortable_fetch(url, {
     headers,
   });
   return resp.text();

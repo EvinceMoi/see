@@ -1,9 +1,9 @@
 // deno-lint-ignore-file no-explicit-any
-import { crypto, } from 'std/crypto/mod.ts';
-import { encodeHex } from 'std/encoding/hex.ts';
-import { ensureDirSync } from 'std/fs/ensure_dir.ts';
+import { crypto, } from '@std/crypto';
+import { encodeHex } from '@std/encoding/hex';
+import { ensureDirSync } from '@std/fs';
 import qrcode from 'qrcode';
-import { configDir, loadConfigFile, saveConfigFile } from '@utils/common.ts';
+import { configDir, loadConfigFile, saveConfigFile, abortable_fetch } from '@utils/common.ts';
 
 const BASE_URL = 'https://passport.bilibili.com';
 const APP_KEY = '4409e2ce8ffd12b8';
@@ -56,7 +56,7 @@ const bili_request = async (path: string, params: params_t) => {
   for (const [k, v] of Object.entries(params)) {
     body.set(k, v);
   }
-  const response = await fetch(`${BASE_URL}${path}`, {
+  const response = await abortable_fetch(`${BASE_URL}${path}`, {
     method: 'POST',
     headers: {
       'content-type': 'application/x-www-form-urlencoded',

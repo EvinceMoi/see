@@ -1,7 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 // import puppeteer, { ElementHandle, Page } from 'puppeteer';
 import { cheerio } from 'cheerio';
-import { PC_USER_AGENT, video_info_t } from '@utils/common.ts';
+import { PC_USER_AGENT, video_info_t, abortable_fetch } from '@utils/common.ts';
 
 const selectors = {
   playlist_contianer: '.wp-playlist-tracks',
@@ -34,7 +34,7 @@ const get_headers = (referer: string) => {
 };
 
 const fetch_html = async (url: string): Promise<string> => {
-  const resp = await fetch(url, {
+  const resp = await abortable_fetch(url, {
     headers: {
       ...PC_USER_AGENT,
     },
@@ -71,7 +71,7 @@ export const get_video_info = async (ep: playlist_item_t, domain: string): Promi
 
   if (ep.src1) {
     const api = `https://${domain}/getvddr2/video?id=${ep.src1}&type=json`;
-    const resp = await fetch(api, {
+    const resp = await abortable_fetch(api, {
       headers: get_headers(ep.referer)
     });
     const res = await resp.json();
