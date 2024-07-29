@@ -21,7 +21,7 @@ const get_headers = (referer: string) => {
     'accept': '*/*',
     'accept-language': 'en-US,en;q=0.8',
     'referer': referer + '/',
-    'sec-ch-ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Brave";v="122"',
+    'sec-ch-ua': 'Not/A)Brand";v="8", "Chromium";v="126", "Microsoft Edge";v="126"',
     'sec-ch-ua-mobile': '?0',
     'sec-ch-ua-platform': '"Linux"',
     'sec-fetch-dest': 'empty',
@@ -29,15 +29,16 @@ const get_headers = (referer: string) => {
     'sec-fetch-site': 'same-origin',
     'sec-gpc': '1',
     'user-agent':
-      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0',
   };
 };
 
 const fetch_html = async (url: string): Promise<string> => {
+  const u = new URL(url);
+  console.log(u.origin + u.pathname);
   const resp = await abortable_fetch(url, {
-    headers: {
-      ...PC_USER_AGENT,
-    },
+    // headers: { ...PC_USER_AGENT, },
+    headers: get_headers(u.origin + u.pathname),
   });
   return resp.text();
 };
@@ -55,6 +56,8 @@ export const get_playlist = async (uri: string): Promise<playlist_item_t[]> => {
   const html = await fetch_html(uri);
   const $ = cheerio.load(html);
   const sjson = $(selectors.source_script).text();
+  if (!sjson)
+    throw new Error('cannot find source script in html');
   const source = JSON.parse(sjson);
   const tracks = source.tracks.map(track => {
     const { caption, src0, src1, src2, src3 } = track;
