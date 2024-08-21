@@ -134,7 +134,7 @@ const get_stream_from_pc_page = async (
   // cdn: cdn: 主线路ws-h5, 备用线路tct-h5
   // rate: 1流畅, 2高清, 3超清, 4蓝光4M, 0蓝光8M或10M
   const cdn = `ws-h5`;
-  const rate = `-1`;
+  const rate = `0`; // -1
   const params = `${sign}&cdn=${cdn}&rate=${rate}`;
   const api_url = `https://www.douyu.com/lapi/live/getH5Play/${rid}`;
   const resp = await abortable_fetch(api_url, {
