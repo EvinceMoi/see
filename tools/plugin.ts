@@ -1,7 +1,7 @@
 import { walk } from '@std/fs';
 import { join, toFileUrl } from '@std/path';
-import { colors } from 'cliffy/ansi/colors.ts';
-import { Command } from 'cliffy/command/mod.ts';
+import { colors } from '@cliffy/ansi/colors';
+import { Command } from '@cliffy/command';
 
 const plug_name = (plugin: string) => `plug_${plugin.replace('.', '_')}`;
 

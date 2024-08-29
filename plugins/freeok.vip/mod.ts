@@ -1,4 +1,4 @@
-import { Command } from 'cliffy/command/mod.ts';
+import { Command } from '@cliffy/command';
 import { get_play_url, get_playlist } from './freeok.ts';
 import {
   enable_player_single_mode,

@@ -1,10 +1,13 @@
-import { encode, Hash } from 'checksum';
-import { DOMParser } from 'deno_dom';
+import { crypto } from '@std/crypto';
+import * as cheerio from 'cheerio';
 import dayjs from 'dayjs';
 import { abortable_fetch, PC_USER_AGENT, video_info_t } from '@utils/common.ts';
 
 const md5sum = (data: string) => {
-  return new Hash('md5').digest(encode(data)).hex();
+  const hash_buf = crypto.subtle.digestSync('MD5', new TextEncoder().encode(data));
+  return Array.from(new Uint8Array(hash_buf))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
 };
 
 const RE_KEY = /(\d{1,9}[0-9a-zA-Z]+)_?\d{0,4}p?(\/playlist|.m3u8|.flv)/;
@@ -35,12 +38,10 @@ const get_pc_page = async (rid: string): Promise<string> => {
   return await fetch_html(`https://www.douyu.com/${rid}`);
 };
 const get_room_info = (html: string): room_info_t => {
-  const doc = new DOMParser().parseFromString(html, 'text/html')!;
-  const page_context_node = doc.querySelector(
-    'script[id="vike_pageContext"][type="application/json"]',
-  );
-  if (!page_context_node) throw new Error('failed to get page context');
-  const page_context = JSON.parse(page_context_node.textContent);
+  const $ = cheerio.load(html);
+  const pcn = $('script[id="vike_pageContext"][type="application/json"]');
+  if (!pcn) throw new Error('failed to get page context');
+  const page_context = JSON.parse(pcn.text());
   return page_context.pageProps.room.roomInfo.roomInfo as room_info_t;
 };
 

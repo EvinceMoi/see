@@ -1,6 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-// import puppeteer, { ElementHandle, Page } from 'puppeteer';
-import { cheerio } from 'cheerio';
+import * as cheerio from 'cheerio';
 import { PC_USER_AGENT, video_info_t, abortable_fetch } from '@utils/common.ts';
 
 const selectors = {

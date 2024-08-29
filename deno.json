@@ -6,23 +6,21 @@
     "build": "deno compile --allow-all -o build/see see.ts"
   },
   "imports": {
-    "@std/collections": "jsr:@std/collections@^0.224.2",
-    "@std/crypto": "jsr:@std/crypto@^0.224.0",
-    "@std/encoding": "jsr:@std/encoding@^0.224.3",
-    "@std/fs": "jsr:@std/fs@^0.229.3",
-    "@std/media-types": "jsr:@std/media-types@^0.224.1",
-    "@std/path": "jsr:@std/path@^0.225.2",
+    "@cliffy/ansi": "jsr:@cliffy/ansi@^1.0.0-rc.5",
+    "@cliffy/command": "jsr:@cliffy/command@^1.0.0-rc.5",
+    "@std/collections": "jsr:@std/collections@^1.0.5",
+    "@std/crypto": "jsr:@std/crypto@^1.0.3",
+    "@std/encoding": "jsr:@std/encoding@^1.0.3",
+    "@std/fs": "jsr:@std/fs@^1.0.2",
+    "@std/media-types": "jsr:@std/media-types@^1.0.3",
+    "@std/path": "jsr:@std/path@^1.0.3",
     "@utils/": "./utils/",
-    "checksum": "https://deno.land/x/checksum@1.4.0/mod.ts",
-    "cheerio": "https://deno.land/x/cheerio@1.0.7/mod.ts",
-    "cliffy/": "https://deno.land/x/cliffy@v1.0.0-rc.4/",
-    "deno_dom": "https://deno.land/x/deno_dom@v0.1.46/deno-dom-wasm.ts",
-    "dayjs": "npm:dayjs@^1.11.11",
+    "cheerio": "npm:cheerio@^1.0.0",
+    "dayjs": "npm:dayjs@^1.11.13",
     "qrcode": "https://deno.land/x/qrcode_terminal@v1.1.1/mod.js"
   },
   "unstable": [
     "bare-node-builtins"
-    // "byonm"
   ],
   "compilerOptions": {
     "lib": [
@@ -33,8 +31,6 @@
     "noImplicitAny": false
   },
   "fmt": {
-    "options": {
-      "singleQuote": true
-    }
+    "singleQuote": true
   }
 }

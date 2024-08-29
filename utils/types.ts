@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { Command } from 'cliffy/command/mod.ts';
+import { Command } from '@cliffy/command';
 
 export interface plugin_t {
   id: string;

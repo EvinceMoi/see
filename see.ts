@@ -1,4 +1,4 @@
-import { Command } from 'cliffy/command/mod.ts';
+import { Command } from '@cliffy/command';
 import plugins from './plugins/mod.ts';
 
 const see = new Command()

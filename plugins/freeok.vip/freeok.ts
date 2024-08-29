@@ -1,5 +1,5 @@
 import { video_info_t, abortable_fetch } from '@utils/common.ts';
-import { cheerio } from 'cheerio';
+import * as cheerio from 'cheerio';
 
 const BASE_URL = 'www.freeok.pro';
 

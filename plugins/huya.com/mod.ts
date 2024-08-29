@@ -1,4 +1,4 @@
-import { Command } from 'cliffy/command/mod.ts';
+import { Command } from '@cliffy/command';
 import { get_play_url } from './huya.ts';
 import { play_video, set_term_title } from '@utils/common.ts';
 import { plugin_t } from '@utils/types.ts';

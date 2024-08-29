@@ -1,4 +1,4 @@
-import { Command } from 'cliffy/command/mod.ts';
+import { Command } from '@cliffy/command';
 import { enable_player_single_mode, play_video, seq, app_terminated } from '@utils/common.ts';
 import { plugin_t } from '@utils/types.ts';
 import { get_playlist, get_video_info } from './ddys.ts';

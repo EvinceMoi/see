@@ -1,5 +1,5 @@
 import { plugin_t } from '@utils/types.ts';
-import { Command } from 'cliffy/command/mod.ts';
+import { Command } from '@cliffy/command';
 import { ensure_login } from './login.ts';
 import { get_live_info, get_video_info } from './bilitv.ts';
 import { enable_player_single_mode, play_video } from '@utils/common.ts';
