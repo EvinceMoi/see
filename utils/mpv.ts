@@ -232,7 +232,7 @@ class MpvSingle implements Player {
     }
     const fo = fileoptions.join(',');
 
-    const command = ['loadfile', vi.video!, 'append-play'];
+    const command = ['loadfile', vi.video!, 'append-play', 0];
     if (fo) command.push(fo);
 
     await this._send_command(command);
