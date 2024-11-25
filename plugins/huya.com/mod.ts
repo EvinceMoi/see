@@ -1,6 +1,7 @@
 import { Command } from '@cliffy/command';
 import { get_play_url } from './huya.ts';
-import { play_video, set_term_title } from '@utils/common.ts';
+import { set_term_title } from '@utils/common.ts';
+import { mpv } from '@utils/mpvd.ts';
 import { plugin_t } from '@utils/types.ts';
 
 const huya = new Command()
@@ -29,10 +30,12 @@ const huya = new Command()
       //     `sec-gpc: 1`,
       //     `user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/122.0.0.0 Safari/537.36`
       // ];
-      await play_video(vi);
+      await mpv.play(vi);
+      await mpv.wait_for_finish();
     } catch (e: any) {
       console.log(e.message);
     }
+    mpv.quit();
   });
 
 const plugin: plugin_t = {

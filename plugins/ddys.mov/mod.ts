@@ -1,5 +1,6 @@
 import { Command } from '@cliffy/command';
-import { enable_player_single_mode, play_video, seq, app_terminated } from '@utils/common.ts';
+import { seq, app_terminated } from '@utils/common.ts';
+import { mpv } from '@utils/mpvd.ts';
 import { plugin_t } from '@utils/types.ts';
 import { get_playlist, get_video_info } from './ddys.ts';
 
@@ -19,10 +20,6 @@ const ddys = new Command()
         if (episode != undefined) {
           uri += `?ep=${episode}`;
         }
-      }
-
-      if (opts['singleWindow']) {
-        enable_player_single_mode();
       }
 
       const playlist = await get_playlist(uri);
@@ -49,11 +46,14 @@ const ddys = new Command()
           `sec-gpc: 1`,
           `user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/122.0.0.0 Safari/537.36`
         ]
-        await play_video(vi);
+        await mpv.play(vi);
+        const eof = await mpv.wait_for_finish();
+        if (eof == 'quit') break;
       }
     } catch (e: any) {
       console.log(e.message);
     }
+    mpv.quit();
   });
 
 const plugin: plugin_t = {

@@ -1,11 +1,10 @@
 import { Command } from "@cliffy/command";
 import { get_play_url, get_playlist } from "./freeok.ts";
 import {
-  enable_player_single_mode,
-  play_video,
   seq,
   app_terminated,
 } from "@utils/common.ts";
+import { mpv } from '@utils/mpvd.ts';
 import { plugin_t } from "@utils/types.ts";
 
 // const DEFAULT_CDN_DOMAIN = 'sf6-cdn-tos.douyinstatic.com';
@@ -25,19 +24,18 @@ const freeok = new Command()
       }
       episode -= 1;
 
-      if (opts["singleWindow"]) {
-        enable_player_single_mode();
-      }
-
       for (const idx of seq(episode, playlist.length)) {
         if (app_terminated) break;
         const ep = playlist[idx];
         const vi = await get_play_url(ep);
-        await play_video(vi);
+        await mpv.play(vi);
+        const eof = await mpv.wait_for_finish();
+        if (eof === 'quit') break;
       }
     } catch (e: any) {
       console.log(e.message);
     }
+    mpv.quit();
   });
 
 const plugin: plugin_t = {

@@ -1,6 +1,7 @@
 import { Command } from '@cliffy/command';
 import { get_play_url } from './dytv.ts';
-import { play_video, set_term_title } from '@utils/common.ts';
+import { set_term_title } from '@utils/common.ts';
+import { mpv } from '@utils/mpvd.ts';
 import { plugin_t } from '@utils/types.ts';
 
 const DEFAULT_CDN_DOMAIN = 'openflv-huos.douyucdn2.cn';
@@ -19,10 +20,13 @@ const douyu = new Command()
       // see: https://github.com/mpv-player/mpv/issues/5286#issuecomment-415980517
       vi.player_options = ['--demuxer-lavf-o-set=http_persistent=0'];
       // vi.player_options = ['demuxer-lavf-o-set=http_persistent=0'];
-      await play_video(vi);
+      await mpv.play(vi);
+      const _eof = await mpv.wait_for_finish();
+    // deno-lint-ignore no-explicit-any
     } catch (e: any) {
       console.log(e.message);
     }
+    mpv.quit();
   });
 
 const plugin: plugin_t = {
