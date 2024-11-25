@@ -130,7 +130,7 @@ const _do_refresh_auth = async (): Promise<boolean> => {
     _save_auth(res);
 
     return true;
-  } catch (e) {
+  } catch (e: any) {
     console.log('error refresh auth:', e.message);
     return false;
   }
@@ -152,7 +152,7 @@ const do_login = async () => {
       try {
         await _do_poll_auth(auth_info.auth_code);
         break;
-      } catch (e) {
+      } catch (e: any) {
         print(`${SAME_LINE}❌ >> poll failed: ${e.message}`);
         await wait(2000);
       }

@@ -51,7 +51,7 @@ const ddys = new Command()
         ]
         await play_video(vi);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.log(e.message);
     }
   });

@@ -1,7 +1,7 @@
 import { video_info_t, abortable_fetch } from '@utils/common.ts';
 import * as cheerio from 'cheerio';
 
-const BASE_URL = 'www.freeok.pro';
+const BASE_URL = 'www.freeok.lol';
 
 const get_headers = (referer: string) => {
   return {
@@ -40,7 +40,7 @@ export interface playlist_item_t {
 }
 
 export const get_playlist = async (id: string): Promise<playlist_item_t[]> => {
-  const url = `https://${BASE_URL}/vod-detail/${id}.html`;
+  const url = `https://${BASE_URL}/vod/${id}.html`;
   const html = await fetch_html(url, get_headers(`https://${BASE_URL}`));
 
   const $ = cheerio.load(html);
@@ -52,12 +52,12 @@ export const get_playlist = async (id: string): Promise<playlist_item_t[]> => {
     return {
       title,
       name: $(el).find('span').text(),
-      // url: [`https://${BASE_URL}`, el.attribs['href']].join('/'),
-      url: `https://${BASE_URL}/xplay/${id}-1-${idx + 1}.html`,
+      // url: [`https://${BASE_URL}`, el.attribs['href']].join(''),
+      url: `https://${BASE_URL}/play/${id}-4-${idx + 1}.html`,
       referer: url
     };
   }).get();
-
+  
   return pl;
 };
 

@@ -47,7 +47,7 @@ const bili = new Command()
           ep++;
         }
       }
-    } catch (e) {
+    } catch (e: any) {
       console.log(e.message);
     }
   });

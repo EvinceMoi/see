@@ -20,7 +20,7 @@ const douyu = new Command()
       vi.player_options = ['--demuxer-lavf-o-set=http_persistent=0'];
       // vi.player_options = ['demuxer-lavf-o-set=http_persistent=0'];
       await play_video(vi);
-    } catch (e) {
+    } catch (e: any) {
       console.log(e.message);
     }
   });
