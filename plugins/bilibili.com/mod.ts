@@ -4,6 +4,7 @@ import { ensure_login } from './login.ts';
 import { get_live_info, get_video_info } from './bilitv.ts';
 // import { exit, play_video } from '@utils/common.ts';
 import { mpv } from '@utils/mpvd.ts';
+import { set_term_title } from '@utils/common.ts';
 
 const is_int = (s) => {
   return !isNaN(s) && !isNaN(parseInt(s));
@@ -41,15 +42,14 @@ const bili = new Command()
         if (u.searchParams.has('p')) ep = parseInt(u.searchParams.get('p')!);
         if (Number.isInteger(p)) ep = p!;
 
-        // if (opts['singleWindow']) {
-        //   enable_player_single_mode();
-        // }
         while (true) {
           u.searchParams.set('p', ep.toString());
           console.log('prepare to open:', u.toString());
           try {
             const vi = await get_video_info(u.toString());
-            // await play_video(vi);
+            if (vi.title)
+              set_term_title(vi.title);
+
             await mpv.play(vi);
             const eof = await mpv.wait_for_finish();
             if (eof === 'quit') {
