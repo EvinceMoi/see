@@ -30,6 +30,7 @@ const huya = new Command()
       //     `sec-gpc: 1`,
       //     `user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/122.0.0.0 Safari/537.36`
       // ];
+      await mpv.start();
       await mpv.play(vi);
       await mpv.wait_for_finish();
     } catch (e: any) {

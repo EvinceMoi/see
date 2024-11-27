@@ -25,6 +25,7 @@ const ddys = new Command()
       const playlist = await get_playlist(uri);
       console.log('playlist:', playlist.map((p) => p.caption));
 
+      await mpv.start();
       const curr: number = (episode ?? 1) - 1;
       for (const idx of seq(curr, playlist.length)) {
         if (app_terminated) break;

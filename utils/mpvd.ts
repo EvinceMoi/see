@@ -3,9 +3,11 @@ import { EventEmitter } from 'node:events';
 import { seq } from '@utils/common.ts';
 import { video_info_t } from '@utils/common.ts';
 
-interface MpvOptions {
+interface MpvPlayerOptions {
+  audio_only?: boolean,
 }
-interface MpvStartOption {
+interface MpvIpcOptions {
+  socket: string,
 }
 interface MpvEvent {
   event: string;
@@ -16,8 +18,6 @@ interface PromiseCtx {
   reject: CallableFunction;
 }
 type MpvCommandArg = string | number;
-
-const mpv_ipc_socket = '/tmp/mpvsocket-see';
 
 class MpvIpc {
   #ipc: Deno.Conn;
@@ -112,33 +112,49 @@ class MpvIpc {
   }
 }
 
+type MpvOptions = MpvPlayerOptions | MpvIpcOptions;
 class Mpv {
   #process: Deno.ChildProcess | null = null;
   #ipc: MpvIpc | null = null;
-  constructor(opts?: MpvOptions) {
-    this.#start();
+  #opts: MpvOptions;
+  constructor(opts: MpvOptions) {
+    this.#opts = opts;
   }
 
-  async #start(opts?: MpvStartOption): Promise<void> {
+  set_option(opt: Partial<MpvOptions>) {
+    this.#opts = {
+      ...this.#opts,
+      ...opt
+    };
+  }
+
+  start() {
+    return this.#start(this.#opts);
+  }
+
+  async #start(opts: MpvOptions): Promise<void> {
     // start mpv
-    this.#start_mpv();
+    this.#start_mpv(opts as Extract<MpvOptions, MpvPlayerOptions>);
     await new Promise((resolve) => setTimeout(resolve, 200));
     // start ipc
-    this.#start_ipc();
+    await this.#start_ipc(opts as Extract<MpvOptions, MpvIpcOptions>);
   }
 
-  #start_mpv() {
+  #start_mpv(opts?: MpvPlayerOptions) {
+    const args = ['--profile=see'];
+    if (opts?.audio_only) {
+      args.push('--vo=null');
+    } else {
+      args.push('--idle');
+    }
     const command = new Deno.Command('mpv', {
-      args: [
-        '--profile=see',
-        '--idle',
-      ],
+      args,
     });
     this.#process = command.spawn();
     this.#process.unref();
   }
-  async #start_ipc() {
-    this.#ipc = await MpvIpc.connect(mpv_ipc_socket);
+  async #start_ipc(opts: MpvIpcOptions) {
+    this.#ipc = await MpvIpc.connect(opts.socket);
   }
   async quit() {
     this.#ipc?.shutdown();
@@ -179,5 +195,16 @@ class Mpv {
   }
 }
 
-const mpv = new Mpv();
-export { mpv };
+const mpv_ipc_socket = '/tmp/mpvsocket-see';
+const opts: MpvOptions = {
+  audio_only: false,
+  socket: mpv_ipc_socket,
+};
+
+const mpv = new Mpv(opts);
+
+export {
+  mpv,
+  type MpvOptions,
+  type MpvPlayerOptions,
+};

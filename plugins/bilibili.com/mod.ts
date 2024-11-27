@@ -15,15 +15,18 @@ const bili = new Command()
   .option('--no-login', 'no login')
   .arguments('<uri:string> [p:number]')
   .action(async (opts, uri, p) => {
-    console.log('opts:', opts);
     try {
       if (opts.login) {
         await ensure_login();
       }
 
+      if (opts['ao']) {
+        mpv.set_option({audio_only: true});
+      }
+
+      await mpv.start();
       if (is_int(uri)) {
         const vi = await get_live_info(parseInt(uri));
-        // await play_video(vi);
         await mpv.play(vi);
       } else {
         let u: URL;

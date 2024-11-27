@@ -24,6 +24,7 @@ const freeok = new Command()
       }
       episode -= 1;
 
+      await mpv.start();
       for (const idx of seq(episode, playlist.length)) {
         if (app_terminated) break;
         const ep = playlist[idx];

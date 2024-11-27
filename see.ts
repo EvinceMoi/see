@@ -1,12 +1,5 @@
 import { Command } from '@cliffy/command';
 import plugins from './plugins/mod.ts';
-// import { exit } from '@utils/common.ts';
-
-// ['SIGINT', 'SIGTERM'].forEach(signal => {
-//   Deno.addSignalListener(signal as Deno.Signal, () => {
-//     exit();
-//   });
-// });
 
 const see = new Command()
   .name('see')
@@ -15,6 +8,7 @@ const see = new Command()
   .meta('deno', Deno.version.deno)
   .meta('v8', Deno.version.v8)
   .meta('typescript', Deno.version.typescript)
+  .globalOption('-a, --ao', 'audio only')
   ;
 see.action(() => {
   see.showHelp();

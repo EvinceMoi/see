@@ -20,6 +20,7 @@ const douyu = new Command()
       // see: https://github.com/mpv-player/mpv/issues/5286#issuecomment-415980517
       vi.player_options = ['--demuxer-lavf-o-set=http_persistent=0'];
       // vi.player_options = ['demuxer-lavf-o-set=http_persistent=0'];
+      await mpv.start();
       await mpv.play(vi);
       const _eof = await mpv.wait_for_finish();
     // deno-lint-ignore no-explicit-any
