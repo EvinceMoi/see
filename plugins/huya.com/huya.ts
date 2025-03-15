@@ -3,6 +3,8 @@ import {
   abortable_fetch,
   MOBILE_USER_AGENT,
   video_info_t,
+  md5sum,
+  decodeBase64,
 } from '@utils/common.ts';
 import { maxBy } from '@std/collections';
 
@@ -20,8 +22,31 @@ const get_info = async (rid: string): Promise<string> => {
   );
 };
 
+const get_uid = async (): Promise<string> => {
+  // return '0';
+  const resp = await abortable_fetch(
+    `https://udblgn.huya.com/web/anonymousLogin`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        appId: 5002,
+        byPass: 3,
+        context: '',
+        version: '2.4',
+        data: {},
+      }),
+    },
+  );
+  const json = await resp.json();
+  const uid = json['data']['uid'] as string;
+  return uid;
+};
+
 export const get_play_url = async (rid: string): Promise<video_info_t> => {
-  // const uid = await get_uid();
+  const uid = await get_uid();
   const html = await get_info(rid);
   const json = JSON.parse(html);
   const data = json['data'];
@@ -40,10 +65,35 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
   );
 
   if (live_status == 'ON') {
-    // flv or hls
-    const streams = data['stream']['flv']['multiLine'] as object[];
-    const stream = maxBy(streams, (s) => s['webPriorityRate']) as object;
-    const url = stream['url'];
+    const streams = data['stream']['baseSteamInfoList'] as object[];
+    const stream = streams[0];
+    const flv_url = stream['sFlvUrl'];
+    const stream_name = stream['sStreamName'];
+    const flv_url_suffix = stream['sFlvUrlSuffix'];
+    const flv_anti_code = stream['sFlvAntiCode'];
+
+    const query = new URLSearchParams(flv_anti_code);
+    query.set('ver', '1');
+    query.set('sv', '2110211124');
+    const seqid = Number.parseInt(uid) + Date.now();
+    query.set('seqid', seqid.toString());
+    query.set('uid', uid);
+    const ct = Math.floor((Number.parseInt(query.get('wsTime') as string, 16) + Math.random()) * 1000);
+    const uuid = Math.floor((ct % 1e10 + Math.random()) * 1000).toString().substring(0, 10);
+    query.set('uuid', uuid);
+
+    const ss = md5sum(`${seqid}|${query.get('ctype')}|${query.get('t')}`);
+    const fm = query.get('fm') as string;
+    const wsSecret = md5sum(
+      String.fromCharCode(...decodeBase64(fm))
+        .replace('$0', uid)
+        .replace('$1', stream_name)
+        .replace('$2', ss)
+        .replace('$3', query.get('wsTime') as string)
+    );
+    query.set('wsSecret', wsSecret);
+    const parms = query.toString();
+    const url = `${flv_url}/${stream_name}.${flv_url_suffix}?${parms}`;
 
     return {
       title: `虎牙 - ${rid}|${rnick} - ${rdesc}|${rgame} - [${start_time}]`,

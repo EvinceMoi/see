@@ -1,6 +1,21 @@
 import { join } from '@std/path/join';
+import { crypto, } from '@std/crypto';
+import { encodeHex } from '@std/encoding/hex';
 // import puppeteer, { Browser, Page } from 'puppeteer';
 // import { Mpv } from '@utils/mpv.ts';
+
+export const md5sum = (data: string) => {
+  const hash = crypto.subtle.digestSync('MD5', new TextEncoder().encode(data));
+  return encodeHex(hash);
+};
+
+export const decodeBase64 = (data: string): Uint8Array => {
+  return new Uint8Array([...atob(data)].map((c) => c.charCodeAt(0)));
+};
+
+export const encodeBase64 = (data: Uint8Array): string => {
+  return btoa(String.fromCharCode(...data));
+};
 
 export const configDir = (plugin: string) => {
   const home = Deno.env.get('HOME')!;
