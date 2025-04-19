@@ -1,7 +1,7 @@
 import { Command } from '@cliffy/command';
 import { seq, app_terminated } from '@utils/common.ts';
 import { mpv } from '@utils/mpvd.ts';
-import { plugin_t } from '@utils/types.ts';
+import type { plugin_t } from '@utils/types.ts';
 import { get_playlist, get_video_info } from './ddys.ts';
 
 const DOMAIN_NAME = `ddys.pro`;
@@ -17,7 +17,7 @@ const ddys = new Command()
         uri = uri_or_name;
       } else {
         uri = `https://${DOMAIN_NAME}/${uri_or_name}`;
-        if (episode != undefined) {
+        if (episode !== undefined) {
           uri += `?ep=${episode}`;
         }
       }
@@ -49,7 +49,7 @@ const ddys = new Command()
         ]
         await mpv.play(vi);
         const eof = await mpv.wait_for_finish();
-        if (eof == 'quit') break;
+        if (eof === 'quit') break;
       }
     } catch (e: any) {
       console.log(e.message);

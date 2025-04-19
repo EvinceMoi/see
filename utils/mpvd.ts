@@ -1,7 +1,7 @@
 import { TextLineStream, toTransformStream } from '@std/streams';
 import { EventEmitter } from 'node:events';
 import { seq } from '@utils/common.ts';
-import { video_info_t } from '@utils/common.ts';
+import type { video_info_t } from '@utils/common.ts';
 
 interface MpvPlayerOptions {
   audio_only?: boolean,
@@ -39,7 +39,7 @@ class MpvIpc {
       },
     );
 
-    return new this(sock);
+    return new MpvIpc(sock);
   }
 
   _gen_id() {
@@ -95,6 +95,7 @@ class MpvIpc {
         command,
         async: is_async,
       };
+      // biome-ignore lint/style/useTemplate: <explanation>
       const to_send = JSON.stringify(req) + '\n';
       this.#ipc.write(new TextEncoder().encode(to_send));
     });

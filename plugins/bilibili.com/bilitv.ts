@@ -2,7 +2,8 @@ import { typeByExtension } from '@std/media-types';
 import { ensureDirSync } from '@std/fs';
 import { basename, join } from '@std/path';
 import { maxBy } from '@std/collections';
-import { configDir, PC_USER_AGENT, video_info_t, abortable_fetch } from '@utils/common.ts';
+import { configDir, PC_USER_AGENT, type video_info_t, abortable_fetch } from '@utils/common.ts';
+import * as cheerio from 'cheerio';
 
 const BASE_URL = 'https://www.bilibili.com';
 const plug_name = 'bilitv';
@@ -62,7 +63,7 @@ export const get_video_info = async (url: string): Promise<video_info_t> => {
   const stream = streams[key];
   const parts = stream.parts;
   // deno-lint-ignore no-explicit-any
-  parts.forEach((p: any) => {
+    parts.forEach((p: any) => {
     const mime = typeByExtension(p.ext);
     if (mime?.startsWith('video')) {
       vi.video = p.url;
@@ -130,19 +131,19 @@ export const get_live_info = async (rid: number): Promise<video_info_t> => {
       }
     }
   */
-  if (room_info.code != 0) {
+  if (room_info.code !== 0) {
     throw new Error(room_info.msg);
   }
 
   const ri = room_info.data;
-  if (ri.live_status != 1) {
+  if (ri.live_status !== 1) {
     throw new Error('room is not living at the moment');
   }
 
   const real_rid = ri.room_id;
 
   const play_info_url =
-    `https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo`;
+    "https://api.live.bilibili.com/xlive/web-room/v2/index/getRoomPlayInfo";
   const params = new URLSearchParams({
     room_id: real_rid,
     protocol: '0,1',
@@ -152,7 +153,7 @@ export const get_live_info = async (rid: number): Promise<video_info_t> => {
     platform: 'h5',
     ptype: '8',
   });
-  const res = await abortable_fetch(play_info_url + '?' + params, {
+  const res = await abortable_fetch(`${play_info_url}?${params}`, {
     headers: {
       ...PC_USER_AGENT,
       ...cookie_header,
@@ -162,7 +163,6 @@ export const get_live_info = async (rid: number): Promise<video_info_t> => {
   const playurl_info = sinfo.data.playurl_info;
   const streams = playurl_info.playurl.stream;
   const stream = streams[0];
-  // deno-lint-ignore no-explicit-any
   const codec = maxBy(
     stream.format[0].codec,
     (c: Record<string, any>) => c.current_qn,
@@ -179,3 +179,55 @@ export const get_live_info = async (rid: number): Promise<video_info_t> => {
     title: real_rid,
   };
 };
+
+interface playlist_item_t {
+  vid: string;
+  title: string;
+  duration: string;
+  p?: number;
+}
+
+const fetch_html = async (url: string): Promise<string> => {
+  // const u = new URL(url);
+  const resp = await abortable_fetch(url, {
+    headers: { ...PC_USER_AGENT, },
+  });
+  return resp.text();
+};
+
+export const get_playlist = async (uri: string): Promise<playlist_item_t[]> => {
+  const html = await fetch_html(uri);
+  const $ = cheerio.load(html);
+  const pods = $('div.pod-item');
+  const pl: playlist_item_t[] = [];
+  pods.each((_idx, el) => {
+    const bvid = el.attribs['data-key'];
+    const single = $(el).children('div').first().hasClass('single-p');
+    if (single) {
+      const it = {
+        vid: bvid,
+        title: $(el).find('.title-txt').text(),
+        duration: $(el).find('.duration').text().trim()
+      };
+      pl.push(it);
+    } else {
+      const base = $(el).find('div');
+      const head = $(base).find('.head');
+      const title = $(head).find('.title-txt').text();
+      const pagelist = $(base).find('.page-list');
+      const pages = $(pagelist).children('.page-item');
+      pages.each((idx, el) => {
+        const ptitle = $(el).find('.title-txt').text();
+        const it = {
+          vid: bvid,
+          title: `${title} - P${ptitle}`,
+          duration: $(el).find('.duration').text().trim(),
+          p: idx + 1,
+        };
+        console.log(it);
+        pl.push(it);
+      });
+    }
+  });
+  return pl;
+}

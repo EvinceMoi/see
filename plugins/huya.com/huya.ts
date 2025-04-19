@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import {
   abortable_fetch,
   MOBILE_USER_AGENT,
-  video_info_t,
+  type video_info_t,
   md5sum,
   decodeBase64,
 } from '@utils/common.ts';
@@ -47,8 +47,8 @@ const get_uid = async (): Promise<string> => {
 
 export const get_play_url = async (rid: string): Promise<video_info_t> => {
   const uid = await get_uid();
-  const html = await get_info(rid);
-  const json = JSON.parse(html);
+  const info = await get_info(rid);
+  const json = JSON.parse(info);
   const data = json['data'];
 
   const live_status = data['liveStatus'];
@@ -64,7 +64,7 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
     'YYYY-MM-DD HH:mm:ss',
   );
 
-  if (live_status == 'ON') {
+  if (live_status === 'ON') {
     const streams = data['stream']['baseSteamInfoList'] as object[];
     const stream = streams[0];
     const flv_url = stream['sFlvUrl'];
@@ -95,17 +95,19 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
     const parms = query.toString();
     const url = `${flv_url}/${stream_name}.${flv_url_suffix}?${parms}`;
 
+    console.log('url:', url);
+
     return {
       title: `虎牙 - ${rid}|${rnick} - ${rdesc}|${rgame} - [${start_time}]`,
       video: url,
     };
-  } else {
-    const url = data['liveData']['hlsUrl'];
-
-    return {
-      title:
-        `虎牙 - ${rid}|${rnick} - ${rdesc}|${rgame} - [${start_time}] - [Replay]`,
-      video: url,
-    };
   }
+
+  const url = data['liveData']['hlsUrl'];
+
+  return {
+    title:
+      `虎牙 - ${rid}|${rnick} - ${rdesc}|${rgame} - [${start_time}] - [Replay]`,
+    video: url,
+  };
 };

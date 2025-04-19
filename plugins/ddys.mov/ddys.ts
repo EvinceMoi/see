@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import * as cheerio from 'cheerio';
-import { PC_USER_AGENT, video_info_t, abortable_fetch } from '@utils/common.ts';
+import { PC_USER_AGENT, type video_info_t, abortable_fetch } from '@utils/common.ts';
 
 const selectors = {
   playlist_contianer: '.wp-playlist-tracks',
@@ -19,7 +19,7 @@ const get_headers = (referer: string) => {
     // 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
     'accept': '*/*',
     'accept-language': 'en-US,en;q=0.8',
-    'referer': referer + '/',
+    'referer': `${referer}/`,
     'sec-ch-ua': 'Not/A)Brand";v="8", "Chromium";v="126", "Microsoft Edge";v="126"',
     'sec-ch-ua-mobile': '?0',
     'sec-ch-ua-platform': '"Linux"',

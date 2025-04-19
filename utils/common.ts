@@ -18,6 +18,7 @@ export const encodeBase64 = (data: Uint8Array): string => {
 };
 
 export const configDir = (plugin: string) => {
+  // biome-ignore lint/style/noNonNullAssertion: <explanation>
   const home = Deno.env.get('HOME')!;
   return `${home}/.config/stream/${plugin}`;
 };
@@ -32,6 +33,7 @@ export const loadConfigFile = (
     const content = Deno.readTextFileSync(file_path);
     if (!json) {
       return content;
+    // biome-ignore lint/style/noUselessElse: <explanation>
     } else {
       return JSON.parse(content);
     }
@@ -101,6 +103,7 @@ export interface video_info_t {
 // };
 
 export const set_term_title = (title: string) => {
+  // biome-ignore lint/style/useTemplate: <explanation>
   const buf = String.fromCharCode(27) + ']0;' + title + String.fromCharCode(7);
   Deno.stdout.writeSync(new TextEncoder().encode(buf));
 };
@@ -121,6 +124,7 @@ const sig_listener = () => {
   abort.abort();
   app_terminated = true;
 };
+// biome-ignore lint/complexity/noForEach: <explanation>
 ['SIGINT', 'SIGTERM'].forEach((signal) => {
   Deno.addSignalListener(signal as Deno.Signal, sig_listener);
 });
@@ -137,6 +141,7 @@ const sig_listener = () => {
 
 export const abortable_fetch = (url: string | URL | Request, init: RequestInit | undefined): Promise<Response> => {
   if (!init) {
+  // biome-ignore lint/style/noParameterAssign: 
     init = {};
   }
   if (!init.signal) {
