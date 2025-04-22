@@ -73,25 +73,35 @@ export const get_play_url = async (rid: string): Promise<video_info_t> => {
     const flv_anti_code = stream['sFlvAntiCode'];
 
     const query = new URLSearchParams(flv_anti_code);
-    query.set('ver', '1');
-    query.set('sv', '2110211124');
-    const seqid = Number.parseInt(uid) + Date.now();
-    query.set('seqid', seqid.toString());
-    query.set('uid', uid);
-    const ct = Math.floor((Number.parseInt(query.get('wsTime') as string, 16) + Math.random()) * 1000);
-    const uuid = Math.floor((ct % 1e10 + Math.random()) * 1000).toString().substring(0, 10);
-    query.set('uuid', uuid);
+    const keep = ['wsSecret', 'wsTime', 'fm'];
+    query.keys().forEach(it => {
+      if (!keep.includes(it)) {
+        query.delete(it);
+      }
+    });
+    query.set('ctype', 'huya_commserver');
+    query.set('fs', 'gct');
+    query.set('codec', '264');
+    // query.set('ver', '1');
+    // query.set('sv', '2110211124');
+    // const seqid = Number.parseInt(uid) + Date.now();
+    // query.set('seqid', seqid.toString());
+    // query.set('uid', uid);
+    // const ct = Math.floor((Number.parseInt(query.get('wsTime') as string, 16) + Math.random()) * 1000);
+    // const uuid = Math.floor((ct % 1e10 + Math.random()) * 1000).toString().substring(0, 10);
+    // query.set('uuid', uuid);
 
-    const ss = md5sum(`${seqid}|${query.get('ctype')}|${query.get('t')}`);
-    const fm = query.get('fm') as string;
-    const wsSecret = md5sum(
-      String.fromCharCode(...decodeBase64(fm))
-        .replace('$0', uid)
-        .replace('$1', stream_name)
-        .replace('$2', ss)
-        .replace('$3', query.get('wsTime') as string)
-    );
-    query.set('wsSecret', wsSecret);
+    // // const ss = md5sum(`${seqid}|${query.get('ctype')}|${query.get('t')}`);
+    // const ss = md5sum(`${seqid}|huya_commserver|${query.get('t')}`);
+    // const fm = query.get('fm') as string;
+    // const wsSecret = md5sum(
+    //   String.fromCharCode(...decodeBase64(fm))
+    //     .replace('$0', uid)
+    //     .replace('$1', stream_name)
+    //     .replace('$2', ss)
+    //     .replace('$3', query.get('wsTime') as string)
+    // );
+    // query.set('wsSecret', wsSecret);
     const parms = query.toString();
     const url = `${flv_url}/${stream_name}.${flv_url_suffix}?${parms}`;
 
