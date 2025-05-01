@@ -27,10 +27,13 @@ const gen_url = (uri: string, p: number | undefined) => {
 const bili = new Command()
   .version('0.0.1')
   .description('play bilibili video/live')
+  .option('--reverse,-r', 'playlist in reverse order')
   .option('--no-login', 'no login')
   .arguments('<uri:string> [p:number]')
   .action(async (opts, uri, p) => {
     try {
+      // console.log('opts:', opts);
+      // return;
       if (opts.login) {
         await ensure_login();
       }
@@ -47,6 +50,9 @@ const bili = new Command()
         const [url, bvid, _pid] = gen_url(uri, p);
 
         const playlist = await get_playlist(url);
+        if (opts['reverse']) {
+          playlist.reverse();
+        }
         if (playlist.length > 0) {
           let curr = playlist.findIndex(pi => {
             return pi.vid === bvid;
