@@ -18,7 +18,7 @@ const gen_url = (uri: string, p: number | undefined) => {
     const pp = p ? `?p=${p}` : '';
     u = new URL(`https://www.bilibili.com/video/${uri}${pp}`);
   }
-  const bvid = u.pathname.substring(u.pathname.lastIndexOf('/') + 1);
+  const bvid = u.pathname.split('/').filter(it => it).pop() || '';
   const pid = u.searchParams.get('p') || '';
 
   return [u.toString(), bvid, pid];
@@ -32,8 +32,6 @@ const bili = new Command()
   .arguments('<uri:string> [p:number]')
   .action(async (opts, uri, p) => {
     try {
-      // console.log('opts:', opts);
-      // return;
       if (opts.login) {
         await ensure_login();
       }
