@@ -166,7 +166,10 @@ class Mpv {
     let fileoptions: string[] = [];
     if (vi.audio) fileoptions.push(`audio-file="${vi.audio}"`);
     if (vi.subtitle) fileoptions.push(`sub-file=${vi.subtitle}`);
-    if (vi.title) fileoptions.push(`force-media-title="${vi.title}"`);
+    if (vi.title) {
+      const title = `%${vi.title.length}%${vi.title}`;
+      fileoptions.push(`force-media-title='${title}'`);
+    }
     const mute = vi.mute ?? 'no';
     fileoptions.push(`mute=${mute}`);
     if (vi.referrer) fileoptions.push(`referrer="${vi.referrer}"`);
