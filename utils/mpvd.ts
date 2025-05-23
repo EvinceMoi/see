@@ -167,8 +167,8 @@ class Mpv {
     if (vi.audio) fileoptions.push(`audio-file="${vi.audio}"`);
     if (vi.subtitle) fileoptions.push(`sub-file=${vi.subtitle}`);
     if (vi.title) {
-      const title = `%${vi.title.length}%${vi.title}`;
-      fileoptions.push(`force-media-title='${title}'`);
+      // const title = `%${vi.title.length}%${vi.title}`;
+      fileoptions.push(`force-media-title=${vi.title}`);
     }
     const mute = vi.mute ?? 'no';
     fileoptions.push(`mute=${mute}`);

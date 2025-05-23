@@ -15,6 +15,21 @@ const sub_path = (bvid: string) => {
   return `${tmp_dir}/${bvid}.ass`;
 };
 
+export const gen_url = (uri: string, p: number | undefined = undefined) => {
+  let u: URL;
+  if (uri.startsWith('http')) {
+    u = new URL(uri);
+  } else {
+    // BV string
+    const pp = p ? `?p=${p}` : '';
+    u = new URL(`https://www.bilibili.com/video/${uri}${pp}`);
+  }
+  const bvid = u.pathname.split('/').filter(it => it).pop() || '';
+  const pid = u.searchParams.get('p') || '';
+
+  return [u.toString(), bvid, pid];
+}
+
 export const get_video_info = async (url: string): Promise<video_info_t> => {
   const args: string[] = [];
   {
@@ -185,6 +200,7 @@ interface playlist_item_t {
   title: string;
   duration: string;
   p?: number;
+  active?: boolean;
 }
 
 const fetch_html = async (url: string): Promise<string> => {
@@ -195,6 +211,7 @@ const fetch_html = async (url: string): Promise<string> => {
   return resp.text();
 };
 
+/*
 export const get_playlist = async (uri: string): Promise<playlist_item_t[]> => {
   const html = await fetch_html(uri);
   const $ = cheerio.load(html);
@@ -229,5 +246,65 @@ export const get_playlist = async (uri: string): Promise<playlist_item_t[]> => {
       });
     }
   });
+  return pl;
+}
+*/
+
+
+// BV1XX4y1K7HD 分P合集示例
+export const get_playlist = async (uri: string): Promise<playlist_item_t[]> => {
+  const [_u, bvid, _pid] = gen_url(uri);
+  const html = await fetch_html(uri);
+  const $ = cheerio.load(html);
+  const lst = $('div.video-pod__list');
+  const multip = lst.hasClass('multip');
+  const pods = lst.children('.video-pod__item');
+  const pl: playlist_item_t[] = [];
+  if (multip) {
+    pods.each((idx, el) => {
+      const title = $(el).find('.title-txt').text();
+      const duration = $(el).find('.duration').text().trim();
+      const active = $(el).hasClass('active');
+      const it = {
+        vid: bvid,
+        title,
+        duration,
+        p: idx + 1,
+        active,
+      };
+      pl.push(it);
+    });
+  } else {
+    pods.each((_idx, el) => {
+      const bvid = el.attribs['data-key'];
+      const single = $(el).children('div').first().hasClass('single-p');
+      if (single) {
+        const it = {
+          vid: bvid,
+          title: $(el).find('.title-txt').text(),
+          duration: $(el).find('.duration').text().trim(),
+          active: $(el).find('.simple-base-item').hasClass('active'),
+        };
+        pl.push(it);
+      } else {
+        const base = $(el).find('div');
+        const head = $(base).find('.head');
+        const title = $(head).find('.title-txt').text();
+        const pagelist = $(base).find('.page-list');
+        const pages = $(pagelist).children('.page-item');
+        pages.each((idx, el) => {
+          const ptitle = $(el).find('.title-txt').text();
+          const it = {
+            vid: bvid,
+            title: `${title} - P${ptitle}`,
+            duration: $(el).find('.duration').text().trim(),
+            p: idx + 1,
+            active: $(el).hasClass('active'),
+          };
+          pl.push(it);
+        });
+      }
+    });
+  }
   return pl;
 }
